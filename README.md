@@ -8,7 +8,7 @@ In command prompt
 # Create virtual environment
 python -m venv venv
 # Enter the virtual environment
-source venv/bin/activate
+.\venv\Scripts\activate
 # Close the virtual environment
 deactivate
 ```
@@ -19,5 +19,5 @@ In Powershell
 Get-ExecutionPolicy
 # If "Restricted"
 Set-ExecutionPolicy RemoteSigned
-# Run the source command again
+# Run the activate script again
 ```
