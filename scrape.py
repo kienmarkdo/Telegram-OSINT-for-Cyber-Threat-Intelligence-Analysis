@@ -1,14 +1,14 @@
 from telethon.sync import TelegramClient, helpers
-from telethon.types import Channel
+from telethon.types import Channel, User
 from api_keys import API_ID, API_HASH, PHONE_NUMBER
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
 import csv
 
 # Replace these with your own values in the "api_keys.py" file
-api_id = str(API_ID)
-api_hash = API_HASH
-phone_number = PHONE_NUMBER
-channel_username = 'bloomberg'
+api_id: str = str(API_ID)
+api_hash: str = API_HASH
+phone_number: str = PHONE_NUMBER
+channel_usernames: list[str] = []
 
 
 class TelegramClientContext(ContextManager[TelegramClient]):
@@ -67,39 +67,70 @@ class TelegramClientContext(ContextManager[TelegramClient]):
 with TelegramClientContext() as client:
     # Connect to Telegram
     client.start(phone_number)
-
-    # Get the channel entity
-    channel: Channel = client.get_entity(channel_username)
-
-    # Get all messages from oldest to newest
-    # TotaList class https://docs.telethon.dev/en/stable/modules/helpers.html
-    # Message class https://tl.telethon.dev/constructors/message.html
-    #               https://docs.telethon.dev/en/v2/concepts/messages.html
-    messages: helpers.TotalList = client.get_messages(channel, limit=None)
-    counter: int = 0
-    # for message in messages:
-    #     print(message)
-    #     print("============================================")
-
-    # Define the CSV file name
-    csv_file_name = f'messages_{channel_username}.csv'
-
-    # Write messages to CSV file
-    with open(csv_file_name, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['date', 'from_id', 'message']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    
+    for dialog in client.iter_dialogs():
         
-        # Write CSV header
-        writer.writeheader()
+        # Append channel username to list, but only channels with at least 1 user
+        # https://stackoverflow.com/questions/69651904/telethon-get-channel-participants-without-admin-privilages
+        if type(dialog.entity) is Channel and dialog.entity.participants_count > 0:
+            print(f"- {dialog.entity.id} / {dialog.entity.username} / {dialog.entity.title}")
+            print("------------------------------------------------------")
+            channel_usernames.append(dialog.entity.username)
 
-        # Write messages to CSV
-        for message in messages:
-            writer.writerow({
-                'date': message.date,
-                'from_id': message.from_id,
-                'message': message.text
-            })
+    for channel_username in channel_usernames:
+        # Get the channel entity
+        channel: Channel = client.get_entity(channel_username)
 
-    print(f'Messages exported to {csv_file_name}')
+        # Get all messages from oldest to newest
+        # TotaList class https://docs.telethon.dev/en/stable/modules/helpers.html
+        # Message class https://tl.telethon.dev/constructors/message.html
+        #               https://docs.telethon.dev/en/v2/concepts/messages.html
+        messages: helpers.TotalList = client.get_messages(channel, limit=10)
+
+        # Define the CSV file name
+        csv_file_name = f'messages_{channel_username}.csv'
+
+        # Write messages to CSV file
+        with open(csv_file_name, 'w', newline='', encoding='utf-8') as csvfile:
+            fieldnames = [
+                'id',
+                'date', 
+                'from_id',
+                'peer_id',
+                'post_author',
+                'via_bot_id',
+                'reply_to',
+                'reply_markup',
+                'forwards',
+                'replies',
+                'media',
+                'views',
+                'edit_date',
+                'message'
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            
+            # Write CSV header
+            writer.writeheader()
+
+            # Write messages to CSV
+            for message in messages:
+                writer.writerow({
+                    'date': message.date,
+                    'from_id': message.from_id,
+                    'peer_id': message.peer_id,
+                    'post_author': message.post_author,
+                    'via_bot_id': message.via_bot_id,
+                    'reply_to': message.reply_to,
+                    'reply_markup': message.reply_markup,
+                    'forwards': message.forwards,
+                    'replies': message.replies,
+                    'media': message.media,
+                    'views': message.views,
+                    'edit_date': message.edit_date,
+                    'message': message.text
+                })
+
+        print(f'Messages exported to {csv_file_name}')
 
 
