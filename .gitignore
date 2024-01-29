@@ -1,5 +1,7 @@
 # Other...
 api_keys.py
+*.session
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
