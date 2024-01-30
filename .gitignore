@@ -1,6 +1,7 @@
 # Other...
 api_keys.py
 *.session
+*.session-journal
 *.csv
 
 # Byte-compiled / optimized / DLL files
