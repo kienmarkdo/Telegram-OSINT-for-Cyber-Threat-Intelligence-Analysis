@@ -1,8 +1,26 @@
 import json
 import datetime
-from api_keys import API_ID, API_HASH, PHONE_NUMBER
+from enum import Enum
+from credentials import (
+    API_ID, 
+    API_HASH, 
+    PHONE_NUMBER, 
+    PROXIES,
+    CURRENT_PROXY
+)
 from telethon.sync import TelegramClient
+from telethon.types import *
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
+
+class EntityName(Enum):
+    BROADCAST_CHANNEL = "broadcast_channel"
+    PUBLIC_GROUP = "public_group"
+    PRIVATE_GROUP = "private_group"
+    DIRECT_MESSAGE = "direct_message"
+
+class CollectionType(Enum):
+    MESSAGES = "messages"
+    PARTICIPANTS = "participants"
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -16,7 +34,7 @@ class JSONEncoder(json.JSONEncoder):
         to a normal string.
     """
     def default(self, o):
-        if isinstance(o, datetime.datetime):  # encode datetime object to isoformat
+        if isinstance(o, datetime):  # encode datetime object to isoformat
             return o.isoformat()
         if isinstance(o, bytes):  # encode byte data into string
             return str(o)
@@ -68,8 +86,93 @@ class TelegramClientContext(ContextManager[TelegramClient]):
         phone_number = PHONE_NUMBER
         
         # Create and return a TelegramClient instance
-        return TelegramClient('anon', api_id, api_hash)
+        if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
+            return TelegramClient(
+                'anon_proxy',
+                api_id,
+                api_hash,
+                proxy=PROXIES[CURRENT_PROXY]
+            )
+        else:  # No proxies are configured
+            return TelegramClient('anon', api_id, api_hash)
 
     def __exit__(self, exc_type, exc_value, traceback):
         # Clean up resources if needed
         pass
+
+def _get_entity_type_name(entity: Channel | Chat | User) -> str:
+    """Takes an entity and returns the entity's type as a string common name.
+
+    Args:
+        Channel:  Entity of type Channel, which can be a broadcast channel or a public group
+        Chat:     Entity of type Chat representing a private group chat
+        User:     Entity of type User representing a direct message with another user
+
+    Returns:
+        Common name of entity as a string.
+        "Broadcast Channel", "Public Group", "Private Group" or "Direct Message"
+    """
+    try:
+        if type(entity) is Channel and entity.broadcast is True:
+            return EntityName.BROADCAST_CHANNEL.value
+        elif type(entity) is Channel and entity.broadcast is False:
+            return EntityName.PUBLIC_GROUP.value
+        elif type(entity) is Chat:
+            return EntityName.PRIVATE_GROUP.value
+        elif type(entity) is User:
+            return EntityName.DIRECT_MESSAGE.value
+    except ValueError as e:
+        print("ERROR: Entity type is not Channel, Chat, or User", e)
+        raise  # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
+
+def _display_entity_info(entity: Channel | Chat | User) -> None:
+    """
+    Displays the information of a given entity.
+
+    Args:
+        entity: An entity of type Channel, Chat, or User
+    
+    Returns:
+        Nothing
+    """
+    # Format the name to have a maximum length of 20 characters
+    formatted_entity_name: str = f'{_get_entity_type_name(entity)[:20]:<20}'
+    print(
+        f"{formatted_entity_name} - "
+        f"{entity.id} "
+        f"{entity.username if hasattr(entity, "username") else ''} "
+        f"{entity.title if hasattr(entity, "title") else ""}"
+    )
+
+    return None
+
+def _rotate_proxy(client: TelegramClient) -> bool:
+    """
+    Disconnects from Telegram, sets the new proxy as the next proxy in the list,
+    and reconnect to Telegram.
+
+    Args:
+        client: the Telegram client session whose new proxy is to be set
+    
+    Return:
+        True if the proxy rotation was a success
+    """
+    try:
+        # Determine the next proxy to rotate to
+        if CURRENT_PROXY + 1 <= len(PROXIES) - 1:  # If not last proxy...
+            client.set_proxy(PROXIES[CURRENT_PROXY + 1])  # Rotate to next proxy
+        else:  # If last proxy...
+            client.set_proxy(PROXIES[0])  # Rotate to first proxy
+        
+        # Disconnect and reconnect Telegram client
+        client.disconnect()
+        client.connect()
+        if client.is_connected():
+            return True
+        else:
+            print(f"Unknown error occured during proxy rotation")
+            return False
+    except OSError:
+        print(f"Failed to reconnect to Telegram during proxy rotation")
+    except:
+        print(f"Unknown error occured during proxy rotation")

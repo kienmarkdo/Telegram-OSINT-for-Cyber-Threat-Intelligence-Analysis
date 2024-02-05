@@ -1,124 +1,163 @@
+import requests
 from telethon.sync import helpers
 from telethon.types import *
+from telethon import functions
 
 import json
 import os
-import datetime
 import logging  # #2 TODO: Convert print statements to proper logging to a file
-from enum import Enum
 
-from helper.helper import TelegramClientContext, JSONEncoder
-from api_keys import API_ID, API_HASH, PHONE_NUMBER
+from helper.helper import (
+    TelegramClientContext,
+    JSONEncoder,
+    _get_entity_type_name,
+    _display_entity_info,
+    _rotate_proxy
+)
+from credentials import API_ID, API_HASH, PHONE_NUMBER, PROXIES
 
-# Replace these with your own values in the "api_keys.py" file
+# Replace these with your own values in the "credentials.py" file
 api_id: str = str(API_ID)
 api_hash: str = API_HASH
 phone_number: str = PHONE_NUMBER
 
-entity_ids: list[str] = []
 
-
-class EntityName(Enum):
-    BROADCAST_CHANNEL = "broadcast_channel"
-    PUBLIC_GROUP = "public_group"
-    PRIVATE_GROUP = "private_group"
-    DIRECT_MESSAGE = "direct_message"
-
-
-def _get_entity_type_name(entity: Channel | Chat | User) -> str:
-    """Takes an entity and returns the entity's type as a string common name.
-
-    Args:
-        Channel:  Entity of type Channel, which can be a broadcast channel or a public group
-        Chat:     Entity of type Chat representing a private group chat
-        User:     Entity of type User representing a direct message with another user
-
-    Returns:
-        Common name of entity as a string.
-        "Broadcast Channel", "Public Group", "Private Group" or "Direct Message"
-    """
-    try:
-        if type(entity) is Channel and entity.broadcast is True:
-            return EntityName.BROADCAST_CHANNEL.value
-        elif type(entity) is Channel and entity.broadcast is False:
-            return EntityName.PUBLIC_GROUP.value
-        elif type(entity) is Chat:
-            return EntityName.PRIVATE_GROUP.value
-        elif type(entity) is User:
-            return EntityName.DIRECT_MESSAGE.value
-    except ValueError as e:
-        print("ERROR: Entity type is not Channel, Chat, or User", e)
-        raise  # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
-
-
-def _display_entity_info(entity: Channel | Chat | User) -> None:
-    """
-    Displays the information of a given entity.
-
-    Args:
-        entity: An entity of type Channel, Chat, or User
-    
-    Returns:
-        Nothing
-    """
-    # Format the name to have a maximum length of 20 characters
-    formatted_entity_name: str = f'{_get_entity_type_name(entity)[:20]:<20}'
-    print(
-        f"{formatted_entity_name} - "
-        f"{entity.id} "
-        f"{entity.username if hasattr(entity, "username") else ''} "
-        f"{entity.title if hasattr(entity, "title") else ""}"
-    )
-
-    return None
-
-
-def collect_messages(entity_id: str) -> bool:
+def collect_messages(entity: Channel | Chat | User) -> bool:
     """
     Performs a collection of all messages in a given entity.
     An entity can be a Channel (Broadcast Channel or Public Group),
     a User (direct message), Chat (private group)
 
     Args:
-        entity_id: ID of an entity of type Channel, User, or Chat
+        entity: entity of type Channel, Chat or User
 
     Return:
         True if collection was successful
     """
     try:
-        # Retrieve entity by its ID
-        entity: Channel | User | Chat = client.get_entity(entity_id)
-        print("Collection in progress...")
-        _display_entity_info(entity)
-        
+        print("[+] Messages collection in progress...")
+
         # Collect messages from entity
-        messages_collected: helpers.TotalList = client.get_messages(entity, limit=1)  # TODO: Limit here
+        # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.messages.MessageMethods.get_messages
+        # Or check client.iter_messages() documentation to see how client.get_messages() works
+        # Due to limitations with the API retrieving more than 3000 messages will take longer than half a minute or more.
+        chunk_size: int = 80  # Number of messages to retrieve per iteration
+        min_id: int = -1  # Retrieve IDs > min_id
+        max_id: int = chunk_size  # Retrieve IDs < max_id
+        counter: int = 0
+        counter_rotate_proxy: int = 2  # Number of iterations until next proxy is set
+        messages_collected: helpers.TotalList = None
+
+        while True:
+            counter += 1
+            if counter == counter_rotate_proxy:
+                print(f"Rotating proxy...")
+                _rotate_proxy(client)
+                counter = 0
+
+            chunk: helpers.TotalList = client.get_messages(
+                entity, min_id=min_id, max_id=max_id, reverse=True
+            )
+            # print("length ", len(chunk))
+
+            if len(chunk) > 0:
+                if messages_collected is None:
+                    messages_collected = chunk  # First chunk
+                else:
+                    messages_collected.extend(chunk)
+                min_id += chunk_size
+                max_id += chunk_size
+            else:
+                break
+        
+        if messages_collected is None or len(messages_collected) == 0:
+            print(f"There are no messages to collect. Skipping...")
+            return True
 
         # Define the JSON file name
-        json_file_name = f"output_{_get_entity_type_name(entity)}_{entity_id}/messages_{entity_id}.json"
+        json_file_name = f"output_{_get_entity_type_name(entity)}_{entity.id}/messages_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)
 
         # Convert the Message object to JSON
-        messages_list = []
+        messages_list: list[dict] = []
         for message in messages_collected:
             if type(message) in (Message, MessageService):
-                message_dict = message.to_dict()
+                message_dict: dict = message.to_dict()
                 messages_list.append(message_dict)
-        
+
         # Write messages in JSON object to JSON file
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(messages_list, json_file, cls=JSONEncoder, indent=2)
 
-        print(f"Messages exported to {json_file_name}")
+        print(f"{len(messages_list)} messages exported to {json_file_name}")
         return True
     except:
         print(f"Collection failed")
         raise
 
 
-# TODO: Collect others...
+def collect_participants(entity: Channel | Chat | User) -> bool:
+    """
+    Performs a collection of all messages in a given entity.
+    An entity can be a Channel (Broadcast Channel or Public Group),
+    a User (direct message), Chat (private group)
+
+    Args:
+        entity: entity of type Channel, Chat or User
+
+    Return:
+        True if collection was successful
+    """
+    # NOTE: Cannot get channel participants / subscribers unless have admin privilege
+    # https://stackoverflow.com/questions/69651904/telethon-get-channel-participants-without-admin-privilages
+    # Only works for private groups
+
+    print("[+] Participants collection in progress...")
+
+    # Collect participants from entity
+    # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.get_participants
+    # Or check client.iter_partcipants() documentation to see how client.get_participants() works
+    """
+    Types of participants:
+    - ChannelParticipant: 
+        ChannelParticipant, ChannelParticipantBanned, ChannelParticipantLeft, 
+        ChannelParticipantAdmin, ChannelParticipantCreator
+        # The filter ChannelParticipantsBanned will return restricted users. 
+        # If you want banned users you should use ChannelParticipantsKicked instead.
+    - ChatParticipant(s)
+        ChatParticipant, ChatParticipantCreator, ChatParticipantAdmin
+        ChatParticipants, ChatParticipantsForbidden
+    - ReadParticipantDate
+    and more... search for "participants" on https://tl.telethon.dev/
+    """
+    # NOTE: There is a an unknown limit on participants collection
+    # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.iter_participants
+    # See documentation for the "aggressive" argument...
+    # > There have been several changes to Telegram’s API that limits the amount of members that can be retrieved,
+    #   and this was a hack that no longer works.
+    participants_collected: helpers.TotalList = client.get_participants(entity, limit=5)
+
+    # Define the JSON file name
+    json_file_name = f"output_{_get_entity_type_name(entity)}_{entity.id}/participants_{entity.id}.json"
+
+    # Check if directory exists, create it if necessary
+    os.makedirs(os.path.dirname(json_file_name), exist_ok=True)
+
+    # Convert the Message object to JSON
+    participants_list: list[dict] = []
+    for participant in participants_collected:
+        participant_dict: dict = participant.to_dict()
+        participants_list.append(participant_dict)
+
+    # Write messages in JSON object to JSON file
+    with open(json_file_name, "w", encoding="utf-8") as json_file:
+        json.dump(participants_list, json_file, cls=JSONEncoder, indent=2)
+
+    print(f"Messages exported to {json_file_name}")
+    return True
+
 
 with TelegramClientContext() as client:
     # Connect to Telegram
@@ -140,9 +179,16 @@ with TelegramClientContext() as client:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.dialogs.DialogMethods.iter_dialogs
     for dialog in client.iter_dialogs():
 
-        entity: Channel | User | Chat = dialog.entity
-        entity_ids.append(entity.id)
+        entity: Channel | Chat | User = dialog.entity
 
-        for id in entity_ids:
-            collect_messages(id)
-            print("------------------------------------------------------")
+        # Retrieve entity by its ID and display logs
+        # entity: Channel | User | Chat = client.get_entity(id)
+        print("[+] Collection in progress...")
+        _display_entity_info(entity)
+        print()
+
+        collect_messages(entity)
+        print()
+        # collect_participants(entity)
+        print("------------------------------------------------------")
+        break
