@@ -296,8 +296,8 @@ def collect_participants_test(entity: Channel | Chat | User):
                 break
             for user in participants.users:
                 try:
-                    if re.findall(r"\b[a-zA-Z]", user.first_name)[0].lower() == key:
-                        # print(user.first_name)
+                    if re.findall(r"\b[a-zA-Z]{2}", user.first_name)[0].lower() == key:
+                        print(user.first_name)
                         all_participants.append(user)
         
                 except:

@@ -5,12 +5,13 @@ from credentials import (
     API_ID, 
     API_HASH, 
     PHONE_NUMBER, 
-    PROXIES,
-    proxy_index
+    PROXIES
 )
 from telethon.sync import TelegramClient
 from telethon.types import *
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
+
+proxy_index: int = 0
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"
