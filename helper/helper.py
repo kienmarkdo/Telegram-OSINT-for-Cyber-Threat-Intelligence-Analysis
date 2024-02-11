@@ -6,7 +6,7 @@ from credentials import (
     API_HASH, 
     PHONE_NUMBER, 
     PROXIES,
-    CURRENT_PROXY
+    proxy_index
 )
 from telethon.sync import TelegramClient
 from telethon.types import *
@@ -84,17 +84,29 @@ class TelegramClientContext(ContextManager[TelegramClient]):
         api_id = API_ID
         api_hash = API_HASH
         phone_number = PHONE_NUMBER
+        session_name: str = None    # private var
+        proxy: dict = None          # private var
+        
+        # Detect proxy in config file
+        if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
+            session_name = "anon_proxy"
+            proxy = PROXIES[proxy_index]
+            print(f"Proxy configuration detected...")
+            print(f"Setting {proxy["proxy_type"]} at '{proxy["addr"]}:{proxy["port"]}'")
+        else:  # No proxies are configured
+            session_name = "anon"
+            print(f"No proxy detected in configurations...")
         
         # Create and return a TelegramClient instance
-        if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
-            return TelegramClient(
-                'anon_proxy',
-                api_id,
-                api_hash,
-                proxy=PROXIES[CURRENT_PROXY]
-            )
-        else:  # No proxies are configured
-            return TelegramClient('anon', api_id, api_hash)
+        print(f"Creating Telegram client with session name: {session_name}")
+        print("==========================================================================")
+        return TelegramClient(
+            session_name,
+            api_id,
+            api_hash,
+            proxy=proxy
+        )
+
 
     def __exit__(self, exc_type, exc_value, traceback):
         # Clean up resources if needed
@@ -146,6 +158,37 @@ def _display_entity_info(entity: Channel | Chat | User) -> None:
 
     return None
 
+def _generate_user_keys() -> list:
+    a_z_underscore = []
+    numbers = []
+
+    for i in range(97, 123, 1):  # ASCII values of a-z inclusive
+        a_z_underscore.append(chr(i))
+
+    for i in range(48, 58, 1):  # ASCII values of 0-9 inclusive
+        numbers.append("_")
+        numbers.append(chr(i))
+
+    keys = []
+
+    for i in a_z_underscore:  # ASCII values of a-z inclusive
+        for j in a_z_underscore:
+            keys.append(i + j)  # __, _a, _b, ..., _z, a_, aa, ab, ac, ..., az, b_, ba, ..., zz
+        for j in numbers:
+            keys.append(i + j)  # _1, _2, _3, ..., _9, a1, a2, a3, a4, ..., a9, b1, b2, ..., z9
+
+    # keys: list[str] = []
+
+    # for i in range(97, 123, 1):  # ASCII values of a-z inclusive
+    #     keys.append(chr(i))
+
+    # for i in range(48, 58, 1):  # ASCII values of 0-9 inclusive
+    #     keys.append(chr(i))
+
+    print(len(keys))
+
+    return keys
+
 def _rotate_proxy(client: TelegramClient) -> bool:
     """
     Disconnects from Telegram, sets the new proxy as the next proxy in the list,
@@ -157,12 +200,25 @@ def _rotate_proxy(client: TelegramClient) -> bool:
     Return:
         True if the proxy rotation was a success
     """
+    # https://stackoverflow.com/questions/74412503/cannot-access-local-variable-a-where-it-is-not-associated-with-a-value-but
+    global proxy_index  # Allow modification of variables declared outside of scope
+
+    if PROXIES is None or len(PROXIES) == 0:
+        print(f"No proxies configured. Skipping proxy rotation...")
+        return True
+
+    new_proxy: dict = None
     try:
         # Determine the next proxy to rotate to
-        if CURRENT_PROXY + 1 <= len(PROXIES) - 1:  # If not last proxy...
-            client.set_proxy(PROXIES[CURRENT_PROXY + 1])  # Rotate to next proxy
+        if proxy_index + 1 <= len(PROXIES) - 1:  # If not last proxy...
+            proxy_index += 1  # Rotate to next proxy
         else:  # If last proxy...
-            client.set_proxy(PROXIES[0])  # Rotate to first proxy
+            proxy_index = 0  # Rotate to first proxy
+        new_proxy = PROXIES[proxy_index]
+        
+        # Set proxy
+        print(f"Rotating to new {new_proxy["proxy_type"]} proxy at {new_proxy["addr"]}:{new_proxy["port"]}")
+        client.set_proxy(new_proxy)
         
         # Disconnect and reconnect Telegram client
         client.disconnect()
@@ -170,7 +226,7 @@ def _rotate_proxy(client: TelegramClient) -> bool:
         if client.is_connected():
             return True
         else:
-            print(f"Unknown error occured during proxy rotation")
+            print(f"Unknown error occured during proxy rotation...")
             return False
     except OSError:
         print(f"Failed to reconnect to Telegram during proxy rotation")
