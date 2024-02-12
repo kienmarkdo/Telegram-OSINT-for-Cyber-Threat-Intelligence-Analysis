@@ -20,6 +20,7 @@ def start_database():
             CREATE TABLE IF NOT EXISTS Messages (
                 id INTEGER PRIMARY KEY,
                 entity_id INTEGER,
+                start_offset_id INTEGER, 
                 last_offset_id INTEGER,
                 collection_start_timestamp INTEGER,
                 collection_end_timestamp INTEGER
@@ -57,10 +58,10 @@ def messages_get_offset_id(entity_id: int):
         # Create a cursor object to execute SQL commands
         cursor = conn.cursor()
 
-        # Get last row in Messages
+        # Get last row in Messages of a specified entity id (most recent Messages collection of a particular entity)
         res = cursor.execute(
             f"""
-            SELECT * FROM Messages WHERE entity_id={entity_id};
+            SELECT * FROM Messages WHERE entity_id={entity_id} ORDER BY ID DESC LIMIT 1;
         """
         )
         returned_result: list[tuple] = res.fetchall()  # returns all resulting rows
@@ -68,7 +69,7 @@ def messages_get_offset_id(entity_id: int):
         offset_id: int = 0
         entity_id: int = entity_id
         if offset_id is not None and len(returned_result) > 0:
-            offset_id = returned_result[0][2]
+            offset_id = returned_result[0][3]
         print(f"Latest offset id of {entity_id} from database: {offset_id}")
 
         # Commit the transaction and close the connection
@@ -83,7 +84,8 @@ def messages_get_offset_id(entity_id: int):
 
 def messages_insert_offset_id(
     entity_id: int,
-    latest_offset_id: int,
+    start_offset_id: int,
+    last_offset_id: int,
     collection_start_timestamp: int,
     collection_end_timestamp: int,
 ):
@@ -96,8 +98,10 @@ def messages_insert_offset_id(
     Args:
         entity_id:
             id of the entity (i.e.: public group, private group, channel, user)
-        latest_offset_id:
-            offset id of the latest message collected
+        start_offset_id:
+            offset id of the first message collected in this collection
+        last_offset_id:
+            offset id of the latest message collected in this collection
         collection_start_timestamp:
             epoch timestamp of when the latest completed successful collection started (i.e.: 1707699810)
         collection_end_timestamp:
@@ -113,8 +117,12 @@ def messages_insert_offset_id(
         # Create the Messages table if it doesn't exist
         cursor.execute(
             f"""
-            INSERT INTO Messages (entity_id, last_offset_id, collection_start_timestamp, collection_end_timestamp) 
-            VALUES ({entity_id}, {latest_offset_id}, {collection_start_timestamp}, {collection_end_timestamp})
+            INSERT INTO Messages (
+                entity_id, start_offset_id, last_offset_id, collection_start_timestamp, collection_end_timestamp
+            ) 
+            VALUES (
+                {entity_id}, {start_offset_id}, {last_offset_id}, {collection_start_timestamp}, {collection_end_timestamp}
+            )
         """
         )
 

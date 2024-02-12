@@ -4,6 +4,7 @@ credentials.py
 *.session-journal
 *.csv
 output_*
+output/
 app.db
 
 # Byte-compiled / optimized / DLL files
