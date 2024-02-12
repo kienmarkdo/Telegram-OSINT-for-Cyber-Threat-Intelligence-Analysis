@@ -22,7 +22,7 @@ def collect_messages(client: TelegramClient, entity: Channel | Chat | User) -> b
     """
     Collects all messages in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
-    a User (direct message), Chat (private group)
+    a User (direct message), Chat (private group).
 
     Args:
         entity: entity of type Channel, Chat or User
@@ -146,3 +146,23 @@ def download_messages(
     except:
         print("[-] Failed to download the collected data into JSON files")
         raise
+
+
+def scrape_messages(client: TelegramClient, entity: Channel | Chat | User) -> bool:
+    """
+    Scrapes messages in a particular entity.
+
+    An entity can be a Channel (Broadcast Channel or Public Group),
+    a User (direct message), Chat (private group).
+
+    Scraping has the following phases:
+    - Collection: fetches messages from the provider API and stores the data in-memory
+    - Download: downloads the messages from memory into disk (JSON file)
+
+    Args:
+        entity: entity of type Channel, Chat or User
+
+    Return:
+        True if scrape was successful
+    """
+    collect_messages(client, entity)
