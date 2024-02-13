@@ -15,7 +15,7 @@ from helper.helper import (
 )
 
 OUTPUT_DIR: str = "output"
-DATETIME_CODE_EXECUTED: str = str(int(time.time()))
+DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
 
 
 def collect_messages(client: TelegramClient, entity: Channel | Chat | User) -> bool:
@@ -148,7 +148,7 @@ def download_messages(
         raise
 
 
-def scrape_messages(client: TelegramClient, entity: Channel | Chat | User) -> bool:
+def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     """
     Scrapes messages in a particular entity.
 

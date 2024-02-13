@@ -19,7 +19,10 @@ from helper.helper import (
     _generate_user_keys,
     _rotate_proxy,
 )
-from scrape_messages import collect_messages
+
+import scrape_messages
+import scrape_participants
+import scrape_entities
 from credentials import API_ID, API_HASH, PHONE_NUMBER
 
 # Replace these with your own values in the "credentials.py" file
@@ -237,35 +240,42 @@ def collect_participants_test(entity: Channel | Chat | User):
     # print(f"{len(all_participants)} users collected...")
     # print(f"Example user:")
     # print(all_participants[0])
-    # queryKey = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    # all_participants = []
-    # channel = entity.id
+    queryKey = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    all_participants = []
+    channel = entity.id
+    counter = 0
+    counter_rotate_proxy = 3
 
-    # for key in queryKey:
-    #     offset = 0
-    #     limit = 100
-    #     while True:
-    #         participants = client(GetParticipantsRequest(
-    #             channel, ChannelParticipantsSearch(key), offset, limit,
-    #             hash=0
-    #         ))
-    #         if not participants.users:
-    #             break
-    #         for user in participants.users:
-    #             try:
-    #                 if re.findall(r"\b[a-zA-Z]", user.first_name)[0].lower() == key:
-    #                     all_participants.append(user)
+    for key in queryKey:
+        counter += 1
+        if counter == counter_rotate_proxy:
+            _rotate_proxy(client)
+            counter = 0
 
-    #             except:
-    #                 pass
+        offset = 0
+        limit = 100
+        while True:
+            participants = client(GetParticipantsRequest(
+                channel, ChannelParticipantsSearch(key), offset, limit,
+                hash=0
+            ))
+            if not participants.users:
+                break
+            for user in participants.users:
+                try:
+                    if re.findall(r"\b[a-zA-Z]", user.first_name)[0].lower() == key:
+                        all_participants.append(user)
 
-    #         offset += len(participants.users)
-    #         # print(offset)
-    # print(f"{len(all_participants)} users collected...")
-    # print(f"Example user:")
-    # print(all_participants[0])
-    # print(entity.participants_count)
-    pass
+                except:
+                    pass
+
+            offset += len(participants.users)
+            # print(offset)
+    print(f"{len(all_participants)} users collected...")
+    print(f"Example user:")
+    print(all_participants[0])
+    print(entity.participants_count)
+    # pass
 
 
 def setup() -> bool:
@@ -309,10 +319,10 @@ with TelegramClientContext() as client:
     for dialog in client.iter_dialogs():
 
         entity: Channel | Chat | User = dialog.entity
-        # if entity.id != 1664947520:
-        #     continue
-        if entity.id != 1012147388:
+        if entity.id != 1647639783:
             continue
+        # if entity.id != 1012147388:
+        #     continue
         # if entity.id != 1488156064:
         #     continue
 
@@ -322,15 +332,17 @@ with TelegramClientContext() as client:
         _display_entity_info(entity)
         print()
 
-        collect_messages(client, entity)
+        scrape_entities.scrape(client)
+        # scrape_messages.scrape(client, entity)
         print()
+        # scrape_participants.scrape(client, entity)
         # collect_participants(entity)
         # collect_participants_test(entity)
         # collect_participants_new(entity)
         print("------------------------------------------------------")
-        # if entity.id == 1664947520:
-        #     break
-        if entity.id == 1012147388:
+        if entity.id == 1647639783:  # russian
             break
+        # if entity.id == 1012147388:
+        #     break
         # if entity.id == 1488156064:
         #     break
