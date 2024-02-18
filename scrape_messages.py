@@ -18,7 +18,7 @@ OUTPUT_DIR: str = "output"
 DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
 
 
-def collect_messages(client: TelegramClient, entity: Channel | Chat | User) -> bool:
+def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     """
     Collects all messages in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
@@ -95,7 +95,7 @@ def collect_messages(client: TelegramClient, entity: Channel | Chat | User) -> b
             message_dict: dict = message.to_dict()
             messages_list.append(message_dict)
 
-        download_messages(messages_list, "messages", entity)
+        download(messages_list, "messages", entity)
 
         print(f"Messages collection and download completed")
         print(f"Updating latest offset id for next collection as: {offset_id_value}")
@@ -115,7 +115,7 @@ def collect_messages(client: TelegramClient, entity: Channel | Chat | User) -> b
         raise
 
 
-def download_messages(
+def download(
     data: list[dict], data_type: str, entity: Channel | Chat | User
 ) -> bool:
     """
@@ -165,4 +165,4 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    collect_messages(client, entity)
+    collect(client, entity)
