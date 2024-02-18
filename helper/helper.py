@@ -12,6 +12,7 @@ from telethon.types import *
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
 
 proxy_index: int = 0
+DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"

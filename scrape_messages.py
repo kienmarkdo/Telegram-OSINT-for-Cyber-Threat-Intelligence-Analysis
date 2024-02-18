@@ -12,10 +12,10 @@ from helper.helper import (
     JSONEncoder,
     _get_entity_type_name,
     _rotate_proxy,
+    DATETIME_CODE_EXECUTED
 )
 
 OUTPUT_DIR: str = "output"
-DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
 
 
 def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
