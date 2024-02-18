@@ -13,6 +13,7 @@ from typing import ContextManager  # to enable static typing with the "with" sta
 
 proxy_index: int = 0
 DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
+OUTPUT_DIR: str = "output"
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"

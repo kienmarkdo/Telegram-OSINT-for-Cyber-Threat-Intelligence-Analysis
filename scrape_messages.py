@@ -12,10 +12,9 @@ from helper.helper import (
     JSONEncoder,
     _get_entity_type_name,
     _rotate_proxy,
-    DATETIME_CODE_EXECUTED
+    DATETIME_CODE_EXECUTED,
+    OUTPUT_DIR,
 )
-
-OUTPUT_DIR: str = "output"
 
 
 def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
@@ -115,9 +114,7 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         raise
 
 
-def download(
-    data: list[dict], data_type: str, entity: Channel | Chat | User
-) -> bool:
+def download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
     """
     Downloads collected messages into JSON files on the disk
 
