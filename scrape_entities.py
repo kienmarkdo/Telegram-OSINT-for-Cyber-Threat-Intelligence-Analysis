@@ -9,11 +9,14 @@ import time
 
 from helper.helper import (
     JSONEncoder,
+    CollectionType,
     _get_entity_type_name,
     _rotate_proxy,
     DATETIME_CODE_EXECUTED,
     OUTPUT_DIR,
 )
+
+COLLECTION_NAME: str = "entities"
 
 
 def _collect(client: TelegramClient) -> list[dict]:
@@ -23,7 +26,7 @@ def _collect(client: TelegramClient) -> list[dict]:
     Return:
         True if collection was successful
     """
-    print("[+] Collecting entities from Telethon API")
+    print(f"[+] Collecting {COLLECTION_NAME} from Telethon API...")
     try:
         # Collect data via API
         entities_collected: list[Channel | Chat | User] = []
@@ -54,7 +57,7 @@ def _download(data: list[dict], data_type: str) -> bool:
     Return:
         True if the download was successful
     """
-    print("[+] Downloading entities into JSON")
+    print(f"[+] Downloading {COLLECTION_NAME} into JSON")
     try:
         # Define the JSON file name
         json_file_name = f"{OUTPUT_DIR}/{DATETIME_CODE_EXECUTED}/{data_type}.json"
@@ -123,7 +126,7 @@ def scrape(client: TelegramClient) -> bool:
     Return:
         True if scrape was successful
     """
-    print("[+] Begin full entities scraping process")
+    print(f"[+] Begin full {COLLECTION_NAME} scraping process")
 
     collected_result: list[dict] = _collect(client)
     if collected_result is None or len(collected_result) == 0:
@@ -131,6 +134,6 @@ def scrape(client: TelegramClient) -> bool:
     if _download(collected_result, "all_entities") is False:
         raise
 
-    print(f"[+] Successfully completed full entities scraping process")
+    print(f"[+] Successfully completed full {COLLECTION_NAME} scraping process")
 
     return True

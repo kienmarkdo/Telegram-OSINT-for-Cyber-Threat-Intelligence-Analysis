@@ -16,8 +16,10 @@ from helper.helper import (
     OUTPUT_DIR,
 )
 
+COLLECTION_NAME: str = "messages"
 
-def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
+
+def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     """
     Collects all messages in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
@@ -30,7 +32,7 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         True if collection was successful
     """
     try:
-        print("[+] Messages collection in progress...")
+        print(f"[+] Collecting {COLLECTION_NAME} from Telethon API")
 
         # Collect messages from entity
         # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.messages.MessageMethods.get_messages
@@ -71,9 +73,9 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 else:
                     messages_collected.extend(chunk)
 
-                print(f"Collecting {len(chunk)} messages...")
+                print(f"Collecting {len(chunk)} {COLLECTION_NAME}...")
             else:  # No messages returned... All messages have been collected
-                print(f"No Messages left to collect")
+                print(f"No {COLLECTION_NAME} left to collect")
                 break
 
             # Next collection will begin with this "latest message collected" offset id
@@ -84,7 +86,7 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 break
 
         if messages_collected is None or len(messages_collected) == 0:
-            print(f"There are no messages to collect. Skipping...")
+            print(f"There are no {COLLECTION_NAME} to collect. Skipping...")
             return True
 
         # Convert the Message object to JSON
@@ -94,9 +96,9 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             message_dict: dict = message.to_dict()
             messages_list.append(message_dict)
 
-        download(messages_list, "messages", entity)
+        _download(messages_list, COLLECTION_NAME, entity)
 
-        print(f"Messages collection and download completed")
+        print(f"Completed collection and downloading of {COLLECTION_NAME}")
         print(f"Updating latest offset id for next collection as: {offset_id_value}")
         collection_end_time = int(time.time())
 
@@ -110,11 +112,11 @@ def collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         )
         return True
     except:
-        print(f"Collection failed")
+        print("[-] Failed to collect data from Telegram API for unknown reasons")
         raise
 
 
-def download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
+def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
     """
     Downloads collected messages into JSON files on the disk
 
@@ -126,6 +128,7 @@ def download(data: list[dict], data_type: str, entity: Channel | Chat | User) ->
     Return:
         True if the download was successful
     """
+    print(f"[+] Downloading {COLLECTION_NAME} into JSON: {entity.id}")
     try:
         # Define the JSON file name
         json_file_name = f"{OUTPUT_DIR}/{DATETIME_CODE_EXECUTED}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
@@ -137,7 +140,7 @@ def download(data: list[dict], data_type: str, entity: Channel | Chat | User) ->
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        print(f"{len(data)} {data_type} exported to {json_file_name}")
+        print(f"{len(data)} {data_type} successfully exported to {json_file_name}")
 
         return True
     except:
@@ -162,4 +165,8 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    collect(client, entity)
+    print(f"[+] Begin {COLLECTION_NAME} scraping process")
+    _collect(client, entity)
+    print(f"[+] Successfully completed {COLLECTION_NAME} scraping process")
+
+    return True

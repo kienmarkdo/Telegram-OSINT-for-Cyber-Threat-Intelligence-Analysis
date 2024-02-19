@@ -21,10 +21,6 @@ class EntityName(Enum):
     PRIVATE_GROUP = "private_group"
     DIRECT_MESSAGE = "direct_message"
 
-class CollectionType(Enum):
-    MESSAGES = "messages"
-    PARTICIPANTS = "participants"
-
 
 class JSONEncoder(json.JSONEncoder):
     """

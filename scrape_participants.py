@@ -18,13 +18,14 @@ from helper.helper import (
     _display_entity_info,
     _generate_user_keys,
     _rotate_proxy,
+    DATETIME_CODE_EXECUTED,
+    OUTPUT_DIR,
 )
 
-OUTPUT_DIR: str = "output"
-DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
 
-
-def collect_participants_large(client: TelegramClient, entity: Channel | Chat | User) -> bool:
+def collect_participants_large(
+    client: TelegramClient, entity: Channel | Chat | User
+) -> bool:
     """
     Collects all participants in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
@@ -106,12 +107,10 @@ def collect_participants_large(client: TelegramClient, entity: Channel | Chat | 
         participant_dict: dict = participant.to_dict()
         participants_list.append(participant_dict)
 
-    download_messages(participants_list, "participants", entity)
+    download(participants_list, "participants", entity)
 
 
-def download_messages(
-    data: list[dict], data_type: str, entity: Channel | Chat | User
-) -> bool:
+def download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
     """
     Downloads collected participants into JSON files on the disk
 
