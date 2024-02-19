@@ -18,6 +18,7 @@ from helper.helper import (
     _display_entity_info,
     _generate_user_keys,
     _rotate_proxy,
+    DATETIME_CODE_EXECUTED,
 )
 
 import scrape_messages
@@ -31,7 +32,7 @@ api_hash: str = API_HASH
 phone_number: str = PHONE_NUMBER
 
 OUTPUT_DIR: str = "output"
-DATETIME_CODE_EXECUTED: str = str(int(time.time()))
+# DATETIME_CODE_EXECUTED: str = str(int(time.time()))
 
 
 def collect_participants_new(entity: Channel | Chat | User) -> bool:
@@ -240,7 +241,34 @@ def collect_participants_test(entity: Channel | Chat | User):
     # print(f"{len(all_participants)} users collected...")
     # print(f"Example user:")
     # print(all_participants[0])
-    queryKey = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    queryKey = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+    ]
     all_participants = []
     channel = entity.id
     counter = 0
@@ -255,10 +283,11 @@ def collect_participants_test(entity: Channel | Chat | User):
         offset = 0
         limit = 100
         while True:
-            participants = client(GetParticipantsRequest(
-                channel, ChannelParticipantsSearch(key), offset, limit,
-                hash=0
-            ))
+            participants = client(
+                GetParticipantsRequest(
+                    channel, ChannelParticipantsSearch(key), offset, limit, hash=0
+                )
+            )
             if not participants.users:
                 break
             for user in participants.users:
@@ -316,10 +345,11 @@ with TelegramClientContext() as client:
     # Iterate through all inboxes aka dialogs (DMs, public groups, private groups, broadcast channels)
     # https://docs.telethon.dev/en/stable/quick-references/client-reference.html#dialogs
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.dialogs.DialogMethods.iter_dialogs
+    # scrape_entities.scrape(client)
     for dialog in client.iter_dialogs():
 
         entity: Channel | Chat | User = dialog.entity
-        if entity.id != 1647639783:
+        if entity.id != 1647639783 and entity.id != 1012147388:
             continue
         # if entity.id != 1012147388:
         #     continue
@@ -332,8 +362,9 @@ with TelegramClientContext() as client:
         _display_entity_info(entity)
         print()
 
-        scrape_entities.scrape(client)
-        # scrape_messages.scrape(client, entity)
+        # scrape_entities.scrape(client)
+        scrape_entities.download_entity(entity)
+        scrape_messages.scrape(client, entity)
         print()
         # scrape_participants.scrape(client, entity)
         # collect_participants(entity)
