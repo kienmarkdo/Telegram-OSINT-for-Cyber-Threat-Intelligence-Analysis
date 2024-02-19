@@ -132,3 +132,5 @@ def scrape(client: TelegramClient) -> bool:
         raise
 
     print(f"[+] Successfully completed full entities scraping process")
+
+    return True
