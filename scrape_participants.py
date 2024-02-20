@@ -1,26 +1,27 @@
-from telethon import TelegramClient
-from telethon.sync import helpers
-from telethon.types import *
-from telethon.tl.functions.channels import GetParticipantsRequest
-
-import re
 import json
-import os
 import logging  # 2 TODO: Convert print statements to proper logging to a file
+import os
+import re
 import time
 from datetime import datetime
 from string import ascii_lowercase
 
+from telethon import TelegramClient
+from telethon.sync import helpers
+from telethon.tl.functions.channels import GetParticipantsRequest
+from telethon.types import *
+
 from helper.helper import (
     EntityName,
     JSONEncoder,
-    _get_entity_type_name,
     _display_entity_info,
     _generate_user_keys,
+    _get_entity_type_name,
     _rotate_proxy,
-    DATETIME_CODE_EXECUTED,
-    OUTPUT_DIR,
 )
+
+from helper.logger import configure_logging, OUTPUT_DIR
+# configure_logging("scrape_participants.py")
 
 
 def collect_participants_large(

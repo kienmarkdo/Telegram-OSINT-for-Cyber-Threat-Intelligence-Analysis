@@ -1,36 +1,30 @@
-from datetime import timezone
-from telethon.sync import helpers
-from telethon.types import *
-from telethon import functions
-from telethon.tl.functions.channels import GetParticipantsRequest
-from db import start_database, messages_get_offset_id, messages_insert_offset_id
-
-import re
 import json
+import logging
 import os
-import logging  # 2 TODO: Convert print statements to proper logging to a file
+import re
 import time
+from datetime import timezone
 
-from helper.helper import (
-    EntityName,
-    TelegramClientContext,
-    JSONEncoder,
-    _get_entity_type_name,
-    _display_entity_info,
-    _generate_user_keys,
-    _rotate_proxy,
-    OUTPUT_DIR,
-)
+from telethon import functions
+from telethon.sync import helpers
+from telethon.tl.functions.channels import GetParticipantsRequest
+from telethon.types import *
 
+import scrape_entities
 import scrape_messages
 import scrape_participants
-import scrape_entities
-from credentials import API_ID, API_HASH, PHONE_NUMBER
-
-# Replace these with your own values in the "credentials.py" file
-api_id: str = str(API_ID)
-api_hash: str = API_HASH
-phone_number: str = PHONE_NUMBER
+from credentials import PHONE_NUMBER
+from db import messages_get_offset_id, messages_insert_offset_id, start_database
+from helper.helper import (
+    EntityName,
+    JSONEncoder,
+    TelegramClientContext,
+    _display_entity_info,
+    _generate_user_keys,
+    _get_entity_type_name,
+    _rotate_proxy,
+)
+from helper.logger import configure_logging, OUTPUT_DIR
 
 
 def collect_participants(entity: Channel | Chat | User) -> bool:
@@ -49,7 +43,7 @@ def collect_participants(entity: Channel | Chat | User) -> bool:
     # https://stackoverflow.com/questions/69651904/telethon-get-channel-participants-without-admin-privilages
     # Only works for private groups
 
-    print("[+] Participants collection in progress...")
+    logging.info("[+] Participants collection in progress...")
 
     # Collect participants from entity
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.get_participants
@@ -74,7 +68,7 @@ def collect_participants(entity: Channel | Chat | User) -> bool:
     # > There have been several changes to Telegram’s API that limits the amount of members that can be retrieved,
     #   and this was a hack that no longer works.
     if _get_entity_type_name(entity) == EntityName.BROADCAST_CHANNEL.value:
-        print(
+        logging.info(
             f"Cannot collect participants in {EntityName.BROADCAST_CHANNEL.value}. Skipping participants collection..."
         )
         return True
@@ -99,7 +93,7 @@ def collect_participants(entity: Channel | Chat | User) -> bool:
     with open(json_file_name, "w", encoding="utf-8") as json_file:
         json.dump(participants_list, json_file, cls=JSONEncoder, indent=2)
 
-    print(f"{len(participants_list)} participants exported to {json_file_name}")
+    logging.info(f"{len(participants_list)} participants exported to {json_file_name}")
     return True
 
 
@@ -117,18 +111,7 @@ def setup() -> bool:
             os.makedirs(OUTPUT_DIR)
 
         # Setup logging configurations
-        logging_filename: str = f"{OUTPUT_DIR}/logging.log"
-        logging.Formatter.converter = lambda *args: datetime.now(
-            timezone.utc
-        ).timetuple()
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s %(levelname)s %(message)s",
-            datefmt="%Y-%m-%dT%H:%M:%S",
-            filename=logging_filename,
-        )  # Set logging formatting and output path
-        logging.info(f"Logging output to '{logging_filename}'")
-        logging.info(f"Logging timezone is set to UTC time")
+        configure_logging()
 
         return True
     except:
@@ -144,7 +127,7 @@ if __name__ == "__main__":
     with TelegramClientContext() as client:
 
         # Connect to Telegram
-        client.start(phone_number)
+        client.start(PHONE_NUMBER)
 
         # Channel, Chat, User types explained: https://stackoverflow.com/questions/76683847/telethon-same-entity-type-for-a-group-and-channel-in-telethon
         #                                      https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html
@@ -172,11 +155,11 @@ if __name__ == "__main__":
 
             # Retrieve entity by its ID and display logs
             # entity: Channel | User | Chat = client.get_entity(id)
-            print("[+] Collection in progress...")
+            logging.info("[+] Collection in progress...")
             _display_entity_info(entity)
             print()
 
-            # scrape_entities.scrape(client)
+            scrape_entities.scrape(client)
             scrape_entities.download_entity(entity)
             # scrape_messages.scrape(client, entity)
             print()

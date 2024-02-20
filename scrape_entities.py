@@ -1,19 +1,18 @@
+import json
+import logging
+import os
+
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
-
-import json
-import os
-import logging  # 2 TODO: Convert print statements to proper logging to a file
-import time
 
 from helper.helper import (
     JSONEncoder,
     _get_entity_type_name,
     _rotate_proxy,
-    DATETIME_CODE_EXECUTED,
-    OUTPUT_DIR,
 )
+
+from helper.logger import OUTPUT_DIR
 
 COLLECTION_NAME: str = "entities"
 
@@ -25,7 +24,7 @@ def _collect(client: TelegramClient) -> list[dict]:
     Return:
         True if collection was successful
     """
-    print(f"[+] Collecting {COLLECTION_NAME} from Telethon API...")
+    logging.info(f"[+] Collecting {COLLECTION_NAME} from Telethon API...")
     try:
         # Collect data via API
         entities_collected: list[Channel | Chat | User] = []
@@ -41,7 +40,9 @@ def _collect(client: TelegramClient) -> list[dict]:
 
         return entities_list
     except:
-        print("[-] Failed to collect data from Telegram API for unknown reasons")
+        logging.critical(
+            "[-] Failed to collect data from Telegram API for unknown reasons"
+        )
         raise
 
 
@@ -56,7 +57,7 @@ def _download(data: list[dict], data_type: str) -> bool:
     Return:
         True if the download was successful
     """
-    print(f"[+] Downloading {COLLECTION_NAME} into JSON")
+    logging.info(f"[+] Downloading {COLLECTION_NAME} into JSON")
     try:
         # Define the JSON file name
         json_file_name = f"{OUTPUT_DIR}/{data_type}.json"
@@ -68,11 +69,11 @@ def _download(data: list[dict], data_type: str) -> bool:
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        print(f"{len(data)} {data_type} exported to {json_file_name}")
+        logging.info(f"{len(data)} {data_type} exported to {json_file_name}")
 
         return True
     except:
-        print("[-] Failed to download the collected data into JSON files")
+        logging.critical("[-] Failed to download the collected data into JSON files")
         raise
 
 
@@ -86,7 +87,7 @@ def download_entity(entity: Channel | Chat | User) -> bool:
     Return:
         True if the download was successful
     """
-    print(f"[+] Downloading entity into JSON: {entity.id}")
+    logging.info(f"[+] Downloading entity into JSON: {entity.id}")
     try:
         # Define the JSON file name
         data: dict = entity.to_dict()
@@ -100,11 +101,11 @@ def download_entity(entity: Channel | Chat | User) -> bool:
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        print(f"{data_type} sucessfully exported to {json_file_name}")
+        logging.info(f"{data_type} sucessfully exported to {json_file_name}")
 
         return True
     except:
-        print("[-] Failed to download the collected data into JSON files")
+        logging.critical("[-] Failed to download the collected data into JSON files")
         raise
 
 
@@ -125,7 +126,8 @@ def scrape(client: TelegramClient) -> bool:
     Return:
         True if scrape was successful
     """
-    print(f"[+] Begin full {COLLECTION_NAME} scraping process")
+    logging.info("==========================================================================")
+    logging.info(f"[+] Begin full {COLLECTION_NAME} scraping process")
 
     collected_result: list[dict] = _collect(client)
     if collected_result is None or len(collected_result) == 0:
@@ -133,6 +135,6 @@ def scrape(client: TelegramClient) -> bool:
     if _download(collected_result, "all_entities") is False:
         raise
 
-    print(f"[+] Successfully completed full {COLLECTION_NAME} scraping process")
+    logging.info(f"[+] Successfully completed full {COLLECTION_NAME} scraping process")
 
     return True

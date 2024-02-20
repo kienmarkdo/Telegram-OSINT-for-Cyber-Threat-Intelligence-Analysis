@@ -1,19 +1,15 @@
-import json
 import datetime
+import json
+import logging
 from enum import Enum
-from credentials import (
-    API_ID, 
-    API_HASH, 
-    PHONE_NUMBER, 
-    PROXIES
-)
-from telethon.sync import TelegramClient
-from telethon.types import *
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
 
+from telethon.sync import TelegramClient
+from telethon.types import *
+
+from credentials import API_HASH, API_ID, PHONE_NUMBER, PROXIES
+
 proxy_index: int = 0
-DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
-OUTPUT_DIR: str = f"output/{DATETIME_CODE_EXECUTED}"
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"
@@ -92,15 +88,15 @@ class TelegramClientContext(ContextManager[TelegramClient]):
         if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
             session_name = "anon_proxy"
             proxy = PROXIES[proxy_index]
-            print(f"Proxy configuration detected...")
-            print(f"Setting {proxy["proxy_type"]} at '{proxy["addr"]}:{proxy["port"]}'")
+            logging.info(f"Proxy configuration detected...")
+            logging.info(f"Setting {proxy["proxy_type"]} proxy at '{proxy["addr"]}:{proxy["port"]}'")
         else:  # No proxies are configured
             session_name = "anon"
-            print(f"No proxy detected in configurations...")
+            logging.info(f"No proxy detected in configurations...")
         
         # Create and return a TelegramClient instance
-        print(f"Creating Telegram client with session name: {session_name}")
-        print("==========================================================================")
+        logging.info(f"Creating Telegram client with session name: {session_name}")
+        logging.info("==========================================================================")
         return TelegramClient(
             session_name,
             api_id,
@@ -125,6 +121,8 @@ def _setup() -> bool:
     """
     pass
 
+
+
 def _get_entity_type_name(entity: Channel | Chat | User) -> str:
     """Takes an entity and returns the entity's type as a string common name.
 
@@ -147,7 +145,7 @@ def _get_entity_type_name(entity: Channel | Chat | User) -> str:
         elif type(entity) is User:
             return EntityName.DIRECT_MESSAGE.value
     except ValueError as e:
-        print("ERROR: Entity type is not Channel, Chat, or User", e)
+        logging.error("ERROR: Entity type is not Channel, Chat, or User", e)
         raise  # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
 
 def _display_entity_info(entity: Channel | Chat | User) -> None:
@@ -217,7 +215,7 @@ def _rotate_proxy(client: TelegramClient) -> bool:
     global proxy_index  # Allow modification of variables declared outside of scope
 
     if PROXIES is None or len(PROXIES) == 0:
-        print(f"No proxies configured. Skipping proxy rotation...")
+        logging.info(f"No proxies configured. Skipping proxy rotation...")
         return True
 
     new_proxy: dict = None
@@ -230,7 +228,7 @@ def _rotate_proxy(client: TelegramClient) -> bool:
         new_proxy = PROXIES[proxy_index]
         
         # Set proxy
-        print(f"Rotating to new {new_proxy["proxy_type"]} proxy at {new_proxy["addr"]}:{new_proxy["port"]}")
+        logging.info(f"Rotating to new {new_proxy["proxy_type"]} proxy at {new_proxy["addr"]}:{new_proxy["port"]}")
         client.set_proxy(new_proxy)
         
         # Disconnect and reconnect Telegram client
@@ -239,9 +237,9 @@ def _rotate_proxy(client: TelegramClient) -> bool:
         if client.is_connected():
             return True
         else:
-            print(f"Unknown error occured during proxy rotation...")
+            logging.error(f"Unknown error occured during proxy rotation...")
             return False
     except OSError:
-        print(f"Failed to reconnect to Telegram during proxy rotation")
+        logging.critical(f"Failed to reconnect to Telegram during proxy rotation")
     except:
-        print(f"Unknown error occured during proxy rotation")
+        logging.critical(f"Unknown error occured during proxy rotation")

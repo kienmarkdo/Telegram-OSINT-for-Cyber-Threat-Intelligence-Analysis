@@ -1,21 +1,21 @@
+import json
+import logging  # 2 TODO: Convert print statements to proper logging to a file
+import os
+import time
+
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
+
 from db import messages_get_offset_id, messages_insert_offset_id
-
-import json
-import os
-import logging  # 2 TODO: Convert print statements to proper logging to a file
-import time
-
 from helper.helper import (
     JSONEncoder,
     _get_entity_type_name,
     _rotate_proxy,
-    DATETIME_CODE_EXECUTED,
-    OUTPUT_DIR,
 )
+from helper.logger import configure_logging, OUTPUT_DIR
 
+# configure_logging("scrape_messages.py")
 COLLECTION_NAME: str = "messages"
 
 
@@ -32,7 +32,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         True if collection was successful
     """
     try:
-        print(f"[+] Collecting {COLLECTION_NAME} from Telethon API")
+        logging.info(f"[+] Collecting {COLLECTION_NAME} from Telethon API")
 
         # Collect messages from entity
         # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.messages.MessageMethods.get_messages
@@ -55,7 +55,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # # Proxy rotation...
             # counter += 1
             # if counter == counter_rotate_proxy:
-            #     print(f"Rotating proxy...")
+            #     logging.info(f"Rotating proxy...")
             #     _rotate_proxy(client)
             #     counter = 0
             #     break
@@ -73,9 +73,9 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 else:
                     messages_collected.extend(chunk)
 
-                print(f"Collecting {len(chunk)} {COLLECTION_NAME}...")
+                logging.info(f"Collecting {len(chunk)} {COLLECTION_NAME}...")
             else:  # No messages returned... All messages have been collected
-                print(f"No {COLLECTION_NAME} left to collect")
+                logging.info(f"No {COLLECTION_NAME} left to collect")
                 break
 
             # Next collection will begin with this "latest message collected" offset id
@@ -86,7 +86,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 break
 
         if messages_collected is None or len(messages_collected) == 0:
-            print(f"There are no {COLLECTION_NAME} to collect. Skipping...")
+            logging.info(f"There are no {COLLECTION_NAME} to collect. Skipping...")
             return True
 
         # Convert the Message object to JSON
@@ -98,8 +98,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
 
         _download(messages_list, COLLECTION_NAME, entity)
 
-        print(f"Completed collection and downloading of {COLLECTION_NAME}")
-        print(f"Updating latest offset id for next collection as: {offset_id_value}")
+        logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
+        logging.info(f"Updating latest offset id for next collection as: {offset_id_value}")
         collection_end_time = int(time.time())
 
         # Insert collection details into DB for tracking purposes
@@ -112,7 +112,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         )
         return True
     except:
-        print("[-] Failed to collect data from Telegram API for unknown reasons")
+        logging.critical("[-] Failed to collect data from Telegram API for unknown reasons")
         raise
 
 
@@ -128,7 +128,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
     Return:
         True if the download was successful
     """
-    print(f"[+] Downloading {COLLECTION_NAME} into JSON: {entity.id}")
+    logging.info(f"[+] Downloading {COLLECTION_NAME} into JSON: {entity.id}")
     try:
         # Define the JSON file name
         json_file_name = f"{OUTPUT_DIR}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
@@ -140,11 +140,11 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        print(f"{len(data)} {data_type} successfully exported to {json_file_name}")
+        logging.info(f"{len(data)} {data_type} successfully exported to {json_file_name}")
 
         return True
     except:
-        print("[-] Failed to download the collected data into JSON files")
+        logging.error("[-] Failed to download the collected data into JSON files")
         raise
 
 
@@ -165,8 +165,9 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    print(f"[+] Begin {COLLECTION_NAME} scraping process")
+    logging.info("==========================================================================")
+    logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     _collect(client, entity)
-    print(f"[+] Successfully completed {COLLECTION_NAME} scraping process")
+    logging.info(f"[+] Successfully completed {COLLECTION_NAME} scraping process")
 
     return True
