@@ -148,7 +148,7 @@ def _get_entity_type_name(entity: Channel | Chat | User) -> str:
         logging.error("ERROR: Entity type is not Channel, Chat, or User", e)
         raise  # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
 
-def _display_entity_info(entity: Channel | Chat | User) -> None:
+def _get_entity_info(entity: Channel | Chat | User) -> str:
     """
     Displays the information of a given entity.
 
@@ -159,15 +159,16 @@ def _display_entity_info(entity: Channel | Chat | User) -> None:
         Nothing
     """
     # Format the name to have a maximum length of 20 characters
-    formatted_entity_name: str = f'{_get_entity_type_name(entity)[:20]:<20}'
-    print(
-        f"{formatted_entity_name} - "
+    # formatted_entity_name: str = f'{_get_entity_type_name(entity)[:20]:<20}'
+
+    result: str = (
+        f"{_get_entity_type_name(entity)} - "
         f"{entity.id} "
         f"{entity.username if hasattr(entity, "username") else ''} "
         f"{entity.title if hasattr(entity, "title") else ""}"
     )
 
-    return None
+    return result
 
 def _generate_user_keys() -> list:
     a_z_underscore = []

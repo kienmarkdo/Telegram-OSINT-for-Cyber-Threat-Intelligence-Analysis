@@ -1,25 +1,20 @@
 import json
 import logging
 import os
-import re
-import time
-from datetime import timezone
 
-from telethon import functions
 from telethon.sync import helpers
-from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.types import *
 
 import scrape_entities
 import scrape_messages
 import scrape_participants
 from credentials import PHONE_NUMBER
-from db import messages_get_offset_id, messages_insert_offset_id, start_database
+from db import start_database
 from helper.helper import (
     EntityName,
     JSONEncoder,
     TelegramClientContext,
-    _display_entity_info,
+    _get_entity_info,
     _generate_user_keys,
     _get_entity_type_name,
     _rotate_proxy,
@@ -156,11 +151,14 @@ if __name__ == "__main__":
             # Retrieve entity by its ID and display logs
             # entity: Channel | User | Chat = client.get_entity(id)
             logging.info("[+] Collection in progress...")
-            _display_entity_info(entity)
+            # print(_get_entity_info(entity))
+            # logging.info(_get_entity_info(entity))
+            logging.info("broadcast_channel - 1647639783 opersvodki Оперативные сводки")
+            exit(-1)
             print()
 
-            scrape_entities.scrape(client)
-            scrape_entities.download_entity(entity)
+            # scrape_entities.scrape(client)
+            # scrape_entities.download_entity(entity)
             # scrape_messages.scrape(client, entity)
             print()
             # scrape_participants.scrape(client, entity)

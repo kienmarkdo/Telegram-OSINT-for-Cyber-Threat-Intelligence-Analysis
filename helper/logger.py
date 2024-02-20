@@ -11,17 +11,19 @@ def configure_logging():
     """
     Setup logging configurations such as output path and output formatting.
 
-    To setup logging configs in a new file, do the following
+    To setup logging configs in a new file, simply call this function
     ```
+    # Import required libraries
     from helper import configure_logging
     import logging
 
-    configure_logging("filename.py")
-    logging.info("This is a log")
-    ```
+    # Execute logging configuration setup function
+    configure_logging()
 
-    Args:
-        filename: name of the file that is being logged
+    # Start logging
+    logging.info("This is a log")
+    logging.info("Привет")
+    ```
     """
     logging_filename = f"{OUTPUT_DIR}/logging.log"
 
@@ -33,10 +35,11 @@ def configure_logging():
     # Set basic configurations for logging formatting
     logging.basicConfig(
         level=logging.INFO,
+        encoding="utf-8",
         format="%(asctime)s %(levelname)s %(message)s",
         datefmt=f"%Y-%m-%dT%H:%M:%S",
         handlers=[
-            logging.FileHandler(logging_filename),  # output to file
+            logging.FileHandler(logging_filename, encoding="utf-8"),  # output to file
             logging.StreamHandler(),  # output to terminal
         ],
     )

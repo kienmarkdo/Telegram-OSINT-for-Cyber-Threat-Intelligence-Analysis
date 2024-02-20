@@ -14,14 +14,13 @@ from telethon.types import *
 from helper.helper import (
     EntityName,
     JSONEncoder,
-    _display_entity_info,
+    _get_entity_info,
     _generate_user_keys,
     _get_entity_type_name,
     _rotate_proxy,
 )
 
 from helper.logger import configure_logging, OUTPUT_DIR
-# configure_logging("scrape_participants.py")
 
 
 def collect_participants_large(

@@ -13,9 +13,8 @@ from helper.helper import (
     _get_entity_type_name,
     _rotate_proxy,
 )
-from helper.logger import configure_logging, OUTPUT_DIR
+from helper.logger import OUTPUT_DIR
 
-# configure_logging("scrape_messages.py")
 COLLECTION_NAME: str = "messages"
 
 
@@ -99,7 +98,9 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         _download(messages_list, COLLECTION_NAME, entity)
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
-        logging.info(f"Updating latest offset id for next collection as: {offset_id_value}")
+        logging.info(
+            f"Updating latest offset id for next collection as: {offset_id_value}"
+        )
         collection_end_time = int(time.time())
 
         # Insert collection details into DB for tracking purposes
@@ -112,7 +113,9 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         )
         return True
     except:
-        logging.critical("[-] Failed to collect data from Telegram API for unknown reasons")
+        logging.critical(
+            "[-] Failed to collect data from Telegram API for unknown reasons"
+        )
         raise
 
 
@@ -140,7 +143,9 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
         with open(json_file_name, "w", encoding="utf-8") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        logging.info(f"{len(data)} {data_type} successfully exported to {json_file_name}")
+        logging.info(
+            f"{len(data)} {data_type} successfully exported to {json_file_name}"
+        )
 
         return True
     except:
@@ -165,7 +170,9 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    logging.info("==========================================================================")
+    logging.info(
+        "=========================================================================="
+    )
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     _collect(client, entity)
     logging.info(f"[+] Successfully completed {COLLECTION_NAME} scraping process")
