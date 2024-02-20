@@ -124,7 +124,7 @@ def download(data: list[dict], data_type: str, entity: Channel | Chat | User) ->
     """
     try:
         # Define the JSON file name
-        json_file_name = f"{OUTPUT_DIR}/{DATETIME_CODE_EXECUTED}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
+        json_file_name = f"{OUTPUT_DIR}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)

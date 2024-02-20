@@ -13,7 +13,7 @@ from typing import ContextManager  # to enable static typing with the "with" sta
 
 proxy_index: int = 0
 DATETIME_CODE_EXECUTED: str = str(datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ"))
-OUTPUT_DIR: str = "output"
+OUTPUT_DIR: str = f"output/{DATETIME_CODE_EXECUTED}"
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"
@@ -41,7 +41,9 @@ class JSONEncoder(json.JSONEncoder):
 
 class TelegramClientContext(ContextManager[TelegramClient]):
     """
-    This class faciliates static typing when using the "with" statement to start a TelegramClient.
+    This class faciliates static typing when using the "with" statement to start a TelegramClient
+    and performs necessary setup steps prior to instantiating a TelegramClient, such as setting up
+    available proxies.
 
     Normally, starting a TelegramClient would be done using async/await as follows:
     ```
@@ -110,6 +112,18 @@ class TelegramClientContext(ContextManager[TelegramClient]):
     def __exit__(self, exc_type, exc_value, traceback):
         # Clean up resources if needed
         pass
+
+def _setup() -> bool:
+    """
+    Execute required setup operations prior to running a collection.
+
+    Setup can include, but are not limited to:
+    - Creating or connecting to a local database
+    - Setup logging configs
+
+    Returns True if the setup completed successfully.
+    """
+    pass
 
 def _get_entity_type_name(entity: Channel | Chat | User) -> str:
     """Takes an entity and returns the entity's type as a string common name.
