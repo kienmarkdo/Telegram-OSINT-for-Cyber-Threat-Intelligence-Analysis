@@ -76,7 +76,7 @@ def _collect_all_under_10k(
             f"{collected_amount} participants collected out of {total_amount} total participants"
         )
         logging.info(
-            f"Successfully collected {"{:.2f}".format(collected_amount/total_amount * 100)}% of participants"
+            f"Successfully collected {'{:.2f}'.format(collected_amount/total_amount * 100)}% of participants"
         )
 
     # Convert the Participants object to JSON
@@ -193,7 +193,7 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
             f"{collected_amount} participants collected out of {total_amount} total participants"
         )
         logging.info(
-            f"Successfully collected {"{:.2f}".format(collected_amount/total_amount * 100)}% of participants"
+            f"Successfully collected {'{:.2f}'.format(collected_amount/total_amount * 100)}% of participants"
         )
     # Convert the Participants object to JSON
     participants_list: list[dict] = []

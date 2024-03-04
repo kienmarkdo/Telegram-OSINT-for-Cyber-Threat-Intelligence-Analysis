@@ -116,12 +116,9 @@ if __name__ == "__main__":
 
                 # scrape_entities.scrape(client)
                 # scrape_entities.download_entity(entity)
-                # scrape_messages.scrape(client, entity)
+                scrape_messages.scrape(client, entity)
                 print()
-                scrape_participants.scrape(client, entity)
-                # collect_participants(entity)
-                # collect_participants_test(entity)
-                # collect_participants_new(entity)
+                # scrape_participants.scrape(client, entity)
                 # print("------------------------------------------------------")
                 # if entity.id == 1647639783:  # russian
                 #     break
