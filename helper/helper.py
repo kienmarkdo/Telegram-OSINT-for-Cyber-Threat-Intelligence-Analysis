@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import random
 from enum import Enum
 from typing import ContextManager  # to enable static typing with the "with" statement in Python
 
@@ -216,17 +217,18 @@ def _rotate_proxy(client: TelegramClient) -> bool:
     global proxy_index  # Allow modification of variables declared outside of scope
 
     if PROXIES is None or len(PROXIES) == 0:
-        logging.info(f"No proxies configured. Skipping proxy rotation...")
+        logging.debug(f"No proxies configured. Skipping proxy rotation...")
         return True
 
     new_proxy: dict = None
     try:
         # Determine the next proxy to rotate to
-        if proxy_index + 1 <= len(PROXIES) - 1:  # If not last proxy...
-            proxy_index += 1  # Rotate to next proxy
-        else:  # If last proxy...
-            proxy_index = 0  # Rotate to first proxy
-        new_proxy = PROXIES[proxy_index]
+        # if proxy_index + 1 <= len(PROXIES) - 1:  # If not last proxy...
+        #     proxy_index += 1  # Rotate to next proxy
+        # else:  # If last proxy...
+        #     proxy_index = 0  # Rotate to first proxy
+        # new_proxy = PROXIES[proxy_index]
+        new_proxy = random.choice(PROXIES)
         
         # Set proxy
         logging.info(f"Rotating to new {new_proxy["proxy_type"]} proxy at {new_proxy["addr"]}:{new_proxy["port"]}")
