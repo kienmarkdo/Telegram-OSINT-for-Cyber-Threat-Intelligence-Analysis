@@ -1,0 +1,12 @@
+async-timeout==4.0.3
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+pyaes==1.6.1
+pyasn1==0.5.1
+PySocks==1.7.1
+python-socks==2.4.4
+requests==2.31.0
+rsa==4.9
+Telethon==1.33.1
+urllib3==2.1.0
