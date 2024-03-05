@@ -38,7 +38,7 @@ Replace the value None with your info. If it is a string, place the string in do
 """
 
 USERNAME: str = None
-PHONE_NUMBER: str = "+12263327244"     # (mandatory) (i.e. +12345554444)
+PHONE_NUMBER: str = "+12223334444"     # (mandatory) (i.e. +12223334444)
 API_KEY: str = None                    # (optional) for Telegram Bot
 HTTP_API: str = None
 API_HASH: str = "<replace>"            # (mandatory)
