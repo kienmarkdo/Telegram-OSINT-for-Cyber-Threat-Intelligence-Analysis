@@ -90,7 +90,7 @@ class TelegramClientContext(ContextManager[TelegramClient]):
             session_name = "anon_proxy"
             proxy = PROXIES[proxy_index]
             logging.info(f"Proxy configuration detected...")
-            logging.info(f"Setting {proxy["proxy_type"]} proxy at '{proxy["addr"]}:{proxy["port"]}'")
+            logging.info(f"Setting {proxy['proxy_type']} proxy at '{proxy['addr']}:{proxy['port']}'")
         else:  # No proxies are configured
             session_name = "anon"
             logging.info(f"No proxy detected in configurations...")
@@ -165,8 +165,8 @@ def _get_entity_info(entity: Channel | Chat | User) -> str:
     result: str = (
         f"{_get_entity_type_name(entity)} - "
         f"{entity.id} "
-        f"{entity.username if hasattr(entity, "username") else ''} "
-        f"{entity.title if hasattr(entity, "title") else ""}"
+        f"{entity.username if hasattr(entity, 'username') else ''} "
+        f"{entity.title if hasattr(entity, 'title') else ''}"
     )
 
     return result
@@ -231,7 +231,7 @@ def _rotate_proxy(client: TelegramClient) -> bool:
         new_proxy = random.choice(PROXIES)
         
         # Set proxy
-        logging.info(f"Rotating to new {new_proxy["proxy_type"]} proxy at {new_proxy["addr"]}:{new_proxy["port"]}")
+        logging.info(f"Rotating to new {new_proxy['proxy_type']} proxy at {new_proxy['addr']}:{new_proxy['port']}")
         client.set_proxy(new_proxy)
         
         # Disconnect and reconnect Telegram client

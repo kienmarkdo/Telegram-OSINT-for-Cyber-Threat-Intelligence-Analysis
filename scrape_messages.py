@@ -14,6 +14,7 @@ from helper.helper import (
     _rotate_proxy,
 )
 from helper.logger import OUTPUT_DIR
+from helper.translate import translate
 
 COLLECTION_NAME: str = "messages"
 
@@ -51,13 +52,13 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
 
         # Main collection logic
         while True:
-            # # Proxy rotation...
-            # counter += 1
-            # if counter == counter_rotate_proxy:
-            #     logging.info(f"Rotating proxy...")
-            #     _rotate_proxy(client)
-            #     counter = 0
-            #     break
+            # Proxy rotation...
+            counter += 1
+            if counter == counter_rotate_proxy:
+                logging.info(f"Rotating proxy...")
+                _rotate_proxy(client)
+                counter = 0
+                break
 
             # Collect messages (reverse=True means oldest to newest)
             # Start at message with id offset_id, collect the next 'limit' messages
@@ -74,7 +75,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
 
                 logging.info(f"Collecting {len(chunk)} {COLLECTION_NAME}...")
             else:  # No messages returned... All messages have been collected
-                logging.info(f"No {COLLECTION_NAME} left to collect")
+                logging.info(f"No new {COLLECTION_NAME} to collect")
                 break
 
             # Next collection will begin with this "latest message collected" offset id
@@ -93,6 +94,15 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         for message in messages_collected:
             # Known message types: Message, MessageService
             message_dict: dict = message.to_dict()
+
+            # Translate message to English, if it is not in English
+            original_message: str | None = message_dict.get("message")
+            if original_message is not None:
+                translated_message: str = translate(original_message)
+                if translated_message is not None:
+                    message_dict["message_translated"] = translated_message
+
+            # Append to download list
             messages_list.append(message_dict)
 
         _download(messages_list, COLLECTION_NAME, entity)
