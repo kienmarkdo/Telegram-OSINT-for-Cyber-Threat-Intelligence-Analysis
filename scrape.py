@@ -15,9 +15,9 @@ from helper.helper import (
     EntityName,
     JSONEncoder,
     TelegramClientContext,
-    _get_entity_info,
-    _get_entity_type_name,
-    _rotate_proxy,
+    get_entity_info,
+    get_entity_type_name,
+    rotate_proxy,
 )
 from helper.logger import configure_logging, OUTPUT_DIR
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 logging.info(
                     f"=========================================================================="
                 )
-                logging.info(f"[+] Collection in progress: {_get_entity_info(entity)}")
+                logging.info(f"[+] Collection in progress: {get_entity_info(entity)}")
                 print()
 
                 # scrape_entities.scrape(client)

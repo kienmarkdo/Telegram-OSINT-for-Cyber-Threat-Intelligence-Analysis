@@ -14,9 +14,9 @@ from telethon.types import *
 from helper.helper import (
     EntityName,
     JSONEncoder,
-    _get_entity_info,
-    _get_entity_type_name,
-    _rotate_proxy,
+    get_entity_info,
+    get_entity_type_name,
+    rotate_proxy,
 )
 
 from helper.logger import OUTPUT_DIR
@@ -51,7 +51,7 @@ def _collect_all_under_10k(
     logging.info(f"[+] Participants collection in progress...")
 
     # Check that entity type is not a broadcast channel
-    if _get_entity_type_name(entity) == EntityName.BROADCAST_CHANNEL.value:
+    if get_entity_type_name(entity) == EntityName.BROADCAST_CHANNEL.value:
         logging.info(
             f"Cannot collect participants in {EntityName.BROADCAST_CHANNEL.value}. Skipping participants collection..."
         )
@@ -161,7 +161,7 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
         while True:
             proxy_counter += 1
             if proxy_counter == 3:
-                _rotate_proxy(client)
+                rotate_proxy(client)
 
             participants = client(GetParticipantsRequest(
                 entity.id, ChannelParticipantsSearch(key), offset, limit,
@@ -218,7 +218,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
     """
     try:
         # Define the JSON file name
-        json_file_name = f"{OUTPUT_DIR}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
+        json_file_name = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)
@@ -259,6 +259,6 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     if entity.participants_count <= 10000:
         _collect_all_under_10k(client, entity)
     else:
-        logging.info(f"There are {entity.participants_count} users in this {_get_entity_info(entity)}")
+        logging.info(f"There are {entity.participants_count} users in this {get_entity_info(entity)}")
         logging.info(f"Please be patient while the collection runs...")
         _collect_all_over_10k(client, entity)

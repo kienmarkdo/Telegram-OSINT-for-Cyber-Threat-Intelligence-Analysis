@@ -8,8 +8,8 @@ from telethon.types import *
 
 from helper.helper import (
     JSONEncoder,
-    _get_entity_type_name,
-    _rotate_proxy,
+    get_entity_type_name,
+    rotate_proxy,
 )
 
 from helper.logger import OUTPUT_DIR
@@ -92,7 +92,7 @@ def download_entity(entity: Channel | Chat | User) -> bool:
         # Define the JSON file name
         data: dict = entity.to_dict()
         data_type: str = "entity_info"
-        json_file_name = f"{OUTPUT_DIR}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
+        json_file_name = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)

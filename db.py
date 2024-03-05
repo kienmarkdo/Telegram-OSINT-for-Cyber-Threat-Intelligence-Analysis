@@ -70,7 +70,7 @@ def messages_get_offset_id(entity_id: int):
         entity_id: int = entity_id
         if offset_id is not None and len(returned_result) > 0:
             offset_id = returned_result[0][3]
-        print(f"Latest offset id of {entity_id} from database: {offset_id}")
+        # print(f"Latest offset id of {entity_id} from database: {offset_id}")
 
         # Commit the transaction and close the connection
         conn.commit()

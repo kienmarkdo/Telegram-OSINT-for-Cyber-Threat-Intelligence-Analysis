@@ -10,8 +10,8 @@ from telethon.types import *
 from db import messages_get_offset_id, messages_insert_offset_id
 from helper.helper import (
     JSONEncoder,
-    _get_entity_type_name,
-    _rotate_proxy,
+    get_entity_type_name,
+    rotate_proxy,
 )
 from helper.logger import OUTPUT_DIR
 from helper.translate import translate
@@ -51,12 +51,13 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         counter_rotate_proxy: int = 2  # Number of iterations until proxy rotation
 
         # Main collection logic
+        logging.debug(f"Starting collection at offset value {offset_id_value}")
         while True:
             # Proxy rotation...
             counter += 1
             if counter == counter_rotate_proxy:
                 logging.info(f"Rotating proxy...")
-                _rotate_proxy(client)
+                rotate_proxy(client)
                 counter = 0
                 break
 
@@ -85,6 +86,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             if counter == counter_max:
                 break
 
+        # Post-collection logic
         if messages_collected is None or len(messages_collected) == 0:
             logging.info(f"There are no {COLLECTION_NAME} to collect. Skipping...")
             return True
@@ -144,7 +146,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
     logging.info(f"[+] Downloading {COLLECTION_NAME} into JSON: {entity.id}")
     try:
         # Define the JSON file name
-        json_file_name = f"{OUTPUT_DIR}/{_get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
+        json_file_name = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)

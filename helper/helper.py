@@ -3,14 +3,15 @@ import json
 import logging
 import random
 from enum import Enum
-from typing import ContextManager  # to enable static typing with the "with" statement in Python
+from typing import (
+    ContextManager,
+)  # to enable static typing with the "with" statement in Python
 
 from telethon.sync import TelegramClient
 from telethon.types import *
 
 from credentials import API_HASH, API_ID, PHONE_NUMBER, PROXIES
 
-proxy_index: int = 0
 
 class EntityName(Enum):
     BROADCAST_CHANNEL = "broadcast_channel"
@@ -29,12 +30,14 @@ class JSONEncoder(json.JSONEncoder):
     - Cannot insert byte object into JSON (i.e.: image or video files), so it is converted
         to a normal string.
     """
+
     def default(self, o):
         if isinstance(o, datetime):  # encode datetime object to isoformat
             return o.isoformat()
         if isinstance(o, bytes):  # encode byte data into string
             return str(o)
         return super().default(o)
+
 
 class TelegramClientContext(ContextManager[TelegramClient]):
     """
@@ -59,7 +62,7 @@ class TelegramClientContext(ContextManager[TelegramClient]):
         client.loop.run_until_complete(main())
         client.disconnect()
     ```
-    To avoid using the "await" statement for network functions (i.e.: get_messages, get_entity...) 
+    To avoid using the "await" statement for network functions (i.e.: get_messages, get_entity...)
     TelegramClient can also be started using the "with" clause:
 
     ```
@@ -75,42 +78,42 @@ class TelegramClientContext(ContextManager[TelegramClient]):
     the "client" word, Python would not provide any hints as to what methods the "client"
     object has.
 
-    By using a ContextManager the TelegramClient object and self defining the __enter__ 
+    By using a ContextManager the TelegramClient object and self defining the __enter__
     and __exit__ methods, it allows for static typing when using the "with" statement.
     """
+
     def __enter__(self) -> TelegramClient:
         api_id = API_ID
         api_hash = API_HASH
         phone_number = PHONE_NUMBER
-        session_name: str = None    # private var
-        proxy: dict = None          # private var
-        
+        session_name: str = None  # private var
+        proxy: dict = None  # private var
+
         # Detect proxy in config file
         if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
             session_name = "anon_proxy"
-            proxy = PROXIES[proxy_index]
+            proxy = PROXIES[0]
             logging.info(f"Proxy configuration detected...")
-            logging.info(f"Setting {proxy['proxy_type']} proxy at '{proxy['addr']}:{proxy['port']}'")
+            logging.info(
+                f"Setting {proxy['proxy_type']} proxy at '{proxy['addr']}:{proxy['port']}'"
+            )
         else:  # No proxies are configured
             session_name = "anon"
             logging.info(f"No proxy detected in configurations...")
-        
+
         # Create and return a TelegramClient instance
         logging.info(f"Creating Telegram client with session name: {session_name}")
-        logging.info("==========================================================================")
-        return TelegramClient(
-            session_name,
-            api_id,
-            api_hash,
-            proxy=proxy
+        logging.info(
+            "=========================================================================="
         )
-
+        return TelegramClient(session_name, api_id, api_hash, proxy=proxy)
 
     def __exit__(self, exc_type, exc_value, traceback):
         # Clean up resources if needed
         pass
 
-def _setup() -> bool:
+
+def setup() -> bool:
     """
     Execute required setup operations prior to running a collection.
 
@@ -123,8 +126,7 @@ def _setup() -> bool:
     pass
 
 
-
-def _get_entity_type_name(entity: Channel | Chat | User) -> str:
+def get_entity_type_name(entity: Channel | Chat | User) -> str:
     """Takes an entity and returns the entity's type as a string common name.
 
     Args:
@@ -149,21 +151,22 @@ def _get_entity_type_name(entity: Channel | Chat | User) -> str:
         logging.error("ERROR: Entity type is not Channel, Chat, or User", e)
         raise  # https://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
 
-def _get_entity_info(entity: Channel | Chat | User) -> str:
+
+def get_entity_info(entity: Channel | Chat | User) -> str:
     """
     Displays the information of a given entity.
 
     Args:
         entity: An entity of type Channel, Chat, or User
-    
+
     Returns:
         Nothing
     """
     # Format the name to have a maximum length of 20 characters
-    # formatted_entity_name: str = f'{_get_entity_type_name(entity)[:20]:<20}'
+    # formatted_entity_name: str = f'{get_entity_type_name(entity)[:20]:<20}'
 
     result: str = (
-        f"{_get_entity_type_name(entity)} - "
+        f"{get_entity_type_name(entity)} - "
         f"{entity.id} "
         f"{entity.username if hasattr(entity, 'username') else ''} "
         f"{entity.title if hasattr(entity, 'title') else ''}"
@@ -171,7 +174,8 @@ def _get_entity_info(entity: Channel | Chat | User) -> str:
 
     return result
 
-def _generate_user_keys() -> list:
+
+def generate_user_keys() -> list:
     a_z_underscore = []
     numbers = []
 
@@ -186,9 +190,13 @@ def _generate_user_keys() -> list:
 
     for i in a_z_underscore:  # ASCII values of a-z inclusive
         for j in a_z_underscore:
-            keys.append(i + j)  # __, _a, _b, ..., _z, a_, aa, ab, ac, ..., az, b_, ba, ..., zz
+            keys.append(
+                i + j
+            )  # __, _a, _b, ..., _z, a_, aa, ab, ac, ..., az, b_, ba, ..., zz
         for j in numbers:
-            keys.append(i + j)  # _1, _2, _3, ..., _9, a1, a2, a3, a4, ..., a9, b1, b2, ..., z9
+            keys.append(
+                i + j
+            )  # _1, _2, _3, ..., _9, a1, a2, a3, a4, ..., a9, b1, b2, ..., z9
 
     # keys: list[str] = []
 
@@ -202,19 +210,18 @@ def _generate_user_keys() -> list:
 
     return keys
 
-def _rotate_proxy(client: TelegramClient) -> bool:
+
+def rotate_proxy(client: TelegramClient) -> bool:
     """
     Disconnects from Telegram, sets the new proxy as the next proxy in the list,
     and reconnect to Telegram.
 
     Args:
         client: the Telegram client session whose new proxy is to be set
-    
+
     Return:
         True if the proxy rotation was a success
     """
-    # https://stackoverflow.com/questions/74412503/cannot-access-local-variable-a-where-it-is-not-associated-with-a-value-but
-    global proxy_index  # Allow modification of variables declared outside of scope
 
     if PROXIES is None or len(PROXIES) == 0:
         logging.debug(f"No proxies configured. Skipping proxy rotation...")
@@ -223,17 +230,14 @@ def _rotate_proxy(client: TelegramClient) -> bool:
     new_proxy: dict = None
     try:
         # Determine the next proxy to rotate to
-        # if proxy_index + 1 <= len(PROXIES) - 1:  # If not last proxy...
-        #     proxy_index += 1  # Rotate to next proxy
-        # else:  # If last proxy...
-        #     proxy_index = 0  # Rotate to first proxy
-        # new_proxy = PROXIES[proxy_index]
         new_proxy = random.choice(PROXIES)
-        
+
         # Set proxy
-        logging.info(f"Rotating to new {new_proxy['proxy_type']} proxy at {new_proxy['addr']}:{new_proxy['port']}")
+        logging.info(
+            f"Rotating to new {new_proxy['proxy_type']} proxy at {new_proxy['addr']}:{new_proxy['port']}"
+        )
         client.set_proxy(new_proxy)
-        
+
         # Disconnect and reconnect Telegram client
         client.disconnect()
         client.connect()
