@@ -34,19 +34,26 @@ Set-ExecutionPolicy RemoteSigned
 Create a `credentials.py` file. Paste and modify the code below accordingly.
 ```py
 """
-Replace the value None with your info. If it is a string, place the string in double-quotes ""
+Replace mandatory None values with your info. Ensure correct data types, as specified.
+For optional values, replace them with your info as needed. Otherwise, keep values as None.
 """
-
-USERNAME: str = None
-PHONE_NUMBER: str = "+12223334444"     # (mandatory) (i.e. +12223334444)
+########################
+# Basic configurations #
+########################
+PHONE_NUMBER: str = None               # (mandatory) (i.e. +12223334444)
+API_HASH: str = None                   # (mandatory)
+API_ID: int = None                     # (mandatory)
+USERNAME: str = None                   # (optional)
 API_KEY: str = None                    # (optional) for Telegram Bot
-HTTP_API: str = None
-API_HASH: str = "<replace>"            # (mandatory)
-API_ID: int = <replace>                # (mandatory)
+HTTP_API: str = None                   # (optional)
 
-# Proxy configurations (optional)
+#############################
+# Collection configurations #
+#############################
+
+# Proxy configuration
 PROXIES: list[dict] = None             # (optional) default None for no proxy
-# Add a proxy object to the list for each new proxy. Example below is of two proxies
+# Add a each proxy object to the list. Below is an example template for two proxies.
 # PROXIES: list[dict] = [
 #     {
 #         'proxy_type': 'socks5',         # (mandatory) protocol to use (i.e.: socks5)
@@ -65,5 +72,4 @@ PROXIES: list[dict] = None             # (optional) default None for no proxy
 #         'rdns': True                    # (optional) whether to use remote or local resolve, default remote
 #     },
 # ]
-
 ```
