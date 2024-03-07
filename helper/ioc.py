@@ -24,14 +24,14 @@ class IOC(Enum):
     ```
     """
 
-    IPV4 = ("IPv4", r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
-    IPV6 = ("IPv6", r"\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b")
+    IPV4 = ("IPv4", r"(?:\d{1,3}\.){3}\d{1,3}")
+    IPV6 = ("IPv6", r"(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}")
     URL = ("URL", r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+")
     DOMAIN = ("Domain", r"\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?<!\.)\b")
     HASH_SHA1 = ("SHA1", r"\b[0-9a-f]{40}\b")
     HASH_SHA256 = ("SHA256", r"\b[0-9a-f]{64}\b")
     HASH_MD5 = ("MD5", r"\b[0-9a-f]{32}\b")
-    CVE = ("CVE", r"\bCVE-\d{4}-\d+\b", re.IGNORECASE)
+    CVE = ("CVE", r"CVE-\d{4}-\d+\b", re.IGNORECASE)
 
 
 def find_iocs(text: str) -> list[tuple[str]]:
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     print(find_iocs(input1))
     print("---------------------------------------------------------------------")
 
-    input2 = "I want to attack 2.3.4.5 with cvE-2024-21410. Willing to pay."
+    input2 = "I want to attack 2.3.4.5 withcvE-2024-21410. Willing to pay."
     print(find_iocs(input2))
     print("---------------------------------------------------------------------")
 

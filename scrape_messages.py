@@ -1,5 +1,9 @@
+"""
+Module for scraping messages in a given entity.
+"""
+
 import json
-import logging  # 2 TODO: Convert print statements to proper logging to a file
+import logging
 import os
 import time
 
@@ -16,6 +20,7 @@ from helper.helper import (
 from helper.logger import OUTPUT_DIR
 from helper.translate import translate
 from helper.ioc import *
+from db import iocs_insert_ioc
 
 COLLECTION_NAME: str = "messages"
 
@@ -141,6 +146,7 @@ def _extract_iocs(message_obj: dict) -> bool:
     Analyzes a dictionary Message object and extracts present IOCs into a local SQLite3 database.
     The Message object must have been converted into a Python dictionary.
 
+    Performs analysis on the original message, not the translated message.
     IOCs include URLs, domains, CVEs, IP addresses (IPv4, IPv6), hashes (SHA256, SHA1, MD5).
 
     Example use cases:
@@ -156,26 +162,37 @@ def _extract_iocs(message_obj: dict) -> bool:
     Returns:
         Returns True if an IOC was present in the message
     """
-    # Verify that an IOC is present
-    # check for URLs and domains
-    # check for CVEs
-    # check for IP addresses (IPv4, IPv6)
-    # check for hashes (SHA256, SHA1, MD5)
+    # Extract list of IOCs from the original message, if any are present
+    iocs: list[tuple[str]] = find_iocs(message_obj["message"])
+
+    if len(iocs) == 0:  # No IOCs found
+        return False
 
     # Extract the IOCs into variables
-    # ID    Message ID  Channel ID  User ID IOC Value   IOC Type    Original Message    Translated Messaged
-    message_id: int = None
-    channel_id: int = None
-    user_id: int = None
-    ioc_value: str = None
-    ioc_type: str = None  # enum object of IOC types
-    original_message: str = None
-    translated_message: str = None  # None if message was in English
+    message_id: int = message_obj["id"]
+    channel_id: int = message_obj["peer_id"]["channel_id"]
+    user_id: int = message_obj["from_id"]["user_id"]
+    original_message: str = message_obj["message"]
+    translated_message: str | None = message_obj.get(
+        "message_translated"
+    )  # None if message was in English
 
-    # Insert the IOCs into the SQLite3 database
+    # Insert the each IOC into the SQLite3 database
+    for ioc in iocs:
+        ioc_type: str = ioc[0]  # i.e.: "IPv4"
+        ioc_value: str = ioc[1]  # i.e.: "2.3.4.5"
 
+        iocs_insert_ioc(
+            message_id,
+            channel_id,
+            user_id,
+            ioc_type,
+            ioc_value,
+            original_message,
+            translated_message,
+        )
 
-    pass
+    return True
 
 
 def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
