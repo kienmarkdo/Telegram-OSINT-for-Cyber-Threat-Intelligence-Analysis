@@ -15,6 +15,7 @@ from helper.helper import (
 )
 from helper.logger import OUTPUT_DIR
 from helper.translate import translate
+from helper.ioc import *
 
 COLLECTION_NAME: str = "messages"
 
@@ -107,6 +108,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # Append to download list
             messages_list.append(message_dict)
 
+            # Extract any IOCs present in the message
+            if type(message) is Message:
+                _extract_iocs(message_dict)
+
         _download(messages_list, COLLECTION_NAME, entity)
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
@@ -129,6 +134,48 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             "[-] Failed to collect data from Telegram API for unknown reasons"
         )
         raise
+
+
+def _extract_iocs(message_obj: dict) -> bool:
+    """
+    Analyzes a dictionary Message object and extracts present IOCs into a local SQLite3 database.
+    The Message object must have been converted into a Python dictionary.
+
+    IOCs include URLs, domains, CVEs, IP addresses (IPv4, IPv6), hashes (SHA256, SHA1, MD5).
+
+    Example use cases:
+    - As company Y, I know what my IPs are. I will search in the database for my IP 2.3.4.5 to
+    see if my IP is present. I discover that it is, I can investigate further. "Is my IP leaked?
+    How was it leaked? Why are people talking about my IP?"
+    - "Give me a list of all hashes that are being discussed, so that I can run it against my company's
+    antivirus software or VirusTotal to see if I can detect it or not.
+
+    Args:
+        message_obj: Message object in a dictionary object
+
+    Returns:
+        Returns True if an IOC was present in the message
+    """
+    # Verify that an IOC is present
+    # check for URLs and domains
+    # check for CVEs
+    # check for IP addresses (IPv4, IPv6)
+    # check for hashes (SHA256, SHA1, MD5)
+
+    # Extract the IOCs into variables
+    # ID    Message ID  Channel ID  User ID IOC Value   IOC Type    Original Message    Translated Messaged
+    message_id: int = None
+    channel_id: int = None
+    user_id: int = None
+    ioc_value: str = None
+    ioc_type: str = None  # enum object of IOC types
+    original_message: str = None
+    translated_message: str = None  # None if message was in English
+
+    # Insert the IOCs into the SQLite3 database
+
+
+    pass
 
 
 def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
