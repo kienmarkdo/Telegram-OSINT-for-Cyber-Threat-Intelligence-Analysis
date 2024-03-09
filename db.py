@@ -5,7 +5,7 @@ sqlite_db_name: str = "app.db"
 
 def start_database():
     """
-    Creates the database for the application if it does not already exist.
+    Creates the database and tables for the application if they do not already exist.
     """
     try:
         # Create or connect to the SQLite3 database
@@ -24,20 +24,42 @@ def start_database():
                 last_offset_id INTEGER,
                 collection_start_timestamp INTEGER,
                 collection_end_timestamp INTEGER
-            )
-        """
+            );
+            """
         )
-        # Fetch names of all tables
-        res = cursor.execute("SELECT name FROM sqlite_master")
-        all_tables: tuple[str] = res.fetchone()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS IOCs (
+                id INTEGER PRIMARY KEY,
+                message_id INTEGER,
+                channel_id INTEGER,
+                user_id INTEGER, 
+                ioc_type TEXT,
+                ioc_value TEXT,
+                message TEXT,
+                message_translated TEXT
+            );
+            """
+        )
+        # Fetch names of all tables to verify that all tables were created successfully
+        table_names: list[str] = ["Messages", "IOCs"]
+        for table_name in table_names:
+            res = cursor.execute(
+                f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';"
+            )
+
+            curr_row = res.fetchone()  # Get current row then move cursor to next row
+            # print(curr_row)
+            if curr_row is None:
+                print(
+                    f"Failed to create the following table in the database: {table_name}"
+                )
+                raise
 
         # Commit the transaction and close the connection
         conn.commit()
         conn.close()
 
-        if "Messages" not in all_tables:
-            print(f"Failed to create Messages table")
-            raise
     except sqlite3.DatabaseError as err:
         raise err
 
@@ -124,6 +146,73 @@ def messages_insert_offset_id(
                 {entity_id}, {start_offset_id}, {last_offset_id}, {collection_start_timestamp}, {collection_end_timestamp}
             )
         """
+        )
+
+        # Commit the transaction and close the connection
+        conn.commit()
+        conn.close()
+    except sqlite3.DatabaseError as err:
+        raise err
+
+
+def iocs_insert_ioc(
+    message_id: int,
+    channel_id: int,
+    user_id: int,
+    ioc_type: str,
+    ioc_value: str,
+    message: str,
+    message_translated: str = None,
+):
+    """
+    Inserts a message and its IOC into the IOCs table in the database.
+
+    Args:
+        message_id: ID of the message the IOC is present in
+        channel_id: ID of the channel that the message is in
+        user_id: ID of the user who sent the message
+        ioc_type: the type of IOC
+        ioc_value: the specific substring text that is the IOC in the message
+        message: the full original text message
+        message_translated: the original message translated into English. None by default
+    """
+    try:
+        # Create or connect to the SQLite3 database
+        conn = sqlite3.connect(sqlite_db_name)
+
+        # Create a cursor object to execute SQL commands
+        cursor = conn.cursor()
+
+        # Create the IOCs table if it doesn't exist
+        # print(f"Inserting...")
+        # print(f"{message_id}, {channel_id}, {user_id}, {ioc_type}, {ioc_value}, {message}, {message_translated}")
+
+        # Define the SQL query with placeholders for parameters (parameterized query)
+        # Parameterized queries to handle characters such as colon (:)
+        sql_query = """
+            INSERT INTO IOCs (
+                message_id,
+                channel_id,
+                user_id,
+                ioc_type,
+                ioc_value,
+                message,
+                message_translated
+            ) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+        # Execute the SQL query with parameters
+        cursor.execute(
+            sql_query,
+            (
+                message_id,
+                channel_id,
+                user_id,
+                ioc_type,
+                ioc_value,
+                message,
+                message_translated,
+            ),
         )
 
         # Commit the transaction and close the connection

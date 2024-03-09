@@ -1,5 +1,9 @@
+"""
+Module for scraping messages in a given entity.
+"""
+
 import json
-import logging  # 2 TODO: Convert print statements to proper logging to a file
+import logging
 import os
 import time
 
@@ -15,6 +19,8 @@ from helper.helper import (
 )
 from helper.logger import OUTPUT_DIR
 from helper.translate import translate
+from helper.ioc import *
+from db import iocs_insert_ioc
 
 COLLECTION_NAME: str = "messages"
 
@@ -107,6 +113,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # Append to download list
             messages_list.append(message_dict)
 
+            # Extract any IOCs present in the message
+            if type(message) is Message:
+                _extract_iocs(message_dict)
+
         _download(messages_list, COLLECTION_NAME, entity)
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
@@ -129,6 +139,60 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             "[-] Failed to collect data from Telegram API for unknown reasons"
         )
         raise
+
+
+def _extract_iocs(message_obj: dict) -> bool:
+    """
+    Analyzes a dictionary Message object and extracts present IOCs into a local SQLite3 database.
+    The Message object must have been converted into a Python dictionary.
+
+    Performs analysis on the original message, not the translated message.
+    IOCs include URLs, domains, CVEs, IP addresses (IPv4, IPv6), hashes (SHA256, SHA1, MD5).
+
+    Example use cases:
+    - As company Y, I know what my IPs are. I will search in the database for my IP 2.3.4.5 to
+    see if my IP is present. I discover that it is, I can investigate further. "Is my IP leaked?
+    How was it leaked? Why are people talking about my IP?"
+    - "Give me a list of all hashes that are being discussed, so that I can run it against my company's
+    antivirus software or VirusTotal to see if I can detect it or not.
+
+    Args:
+        message_obj: Message object in a dictionary object
+
+    Returns:
+        Returns True if an IOC was present in the message
+    """
+    # Extract list of IOCs from the original message, if any are present
+    iocs: list[tuple[str]] = find_iocs(message_obj["message"])
+
+    if len(iocs) == 0:  # No IOCs found
+        return False
+
+    # Extract the IOCs into variables
+    message_id: int = message_obj["id"]
+    channel_id: int = message_obj["peer_id"]["channel_id"]
+    user_id: int = message_obj["from_id"]["user_id"]
+    original_message: str = message_obj["message"]
+    translated_message: str | None = message_obj.get(
+        "message_translated"
+    )  # None if message was in English
+
+    # Insert the each IOC into the SQLite3 database
+    for ioc in iocs:
+        ioc_type: str = ioc[0]  # i.e.: "IPv4"
+        ioc_value: str = ioc[1]  # i.e.: "2.3.4.5"
+
+        iocs_insert_ioc(
+            message_id,
+            channel_id,
+            user_id,
+            ioc_type,
+            ioc_value,
+            original_message,
+            translated_message,
+        )
+
+    return True
 
 
 def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
