@@ -1,3 +1,11 @@
+"""
+Interface with the local SQLite3 database.
+
+This database is required for operational usage and allows collections to
+work properly, such as tracking offset ID when extracting messages with
+the Telegram API. This database does not store the actual collected data.
+"""
+
 import sqlite3
 
 sqlite_db_name: str = "app.db"
@@ -14,10 +22,11 @@ def start_database():
         # Create a cursor object to execute SQL commands
         cursor = conn.cursor()
 
-        # Create the Messages table if it doesn't exist
+        # Create required tables
+        # To track messages collection details/metadata, such as offset ID or elapsed time
         cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS Messages (
+            CREATE TABLE IF NOT EXISTS Messages_collection (
                 id INTEGER PRIMARY KEY,
                 entity_id INTEGER,
                 start_offset_id INTEGER, 
@@ -42,7 +51,7 @@ def start_database():
             """
         )
         # Fetch names of all tables to verify that all tables were created successfully
-        table_names: list[str] = ["Messages", "IOCs"]
+        table_names: list[str] = ["Messages_collection", "IOCs"]
         for table_name in table_names:
             res = cursor.execute(
                 f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';"
@@ -61,10 +70,12 @@ def start_database():
         conn.close()
 
     except sqlite3.DatabaseError as err:
-        raise err
+        raise f"Database error: {err}"
+    finally:
+        conn.close()
 
 
-def messages_get_offset_id(entity_id: int):
+def messages_collection_get_offset_id(entity_id: int):
     """
     Gets the latest offset id in the database with the latest offset id
     of the last message in the latest messages collection.
@@ -80,10 +91,10 @@ def messages_get_offset_id(entity_id: int):
         # Create a cursor object to execute SQL commands
         cursor = conn.cursor()
 
-        # Get last row in Messages of a specified entity id (most recent Messages collection of a particular entity)
+        # Get last row of a specified entity id (most recent messages collection of a particular entity)
         res = cursor.execute(
             f"""
-            SELECT * FROM Messages WHERE entity_id={entity_id} ORDER BY ID DESC LIMIT 1;
+            SELECT * FROM Messages_collection WHERE entity_id={entity_id} ORDER BY ID DESC LIMIT 1;
         """
         )
         returned_result: list[tuple] = res.fetchall()  # returns all resulting rows
@@ -101,10 +112,12 @@ def messages_get_offset_id(entity_id: int):
         return offset_id
 
     except sqlite3.DatabaseError as err:
-        raise err
+        raise f"Database error: {err}"
+    finally:
+        conn.close()
 
 
-def messages_insert_offset_id(
+def messages_collection_insert_offset_id(
     entity_id: int,
     start_offset_id: int,
     last_offset_id: int,
@@ -136,87 +149,70 @@ def messages_insert_offset_id(
         # Create a cursor object to execute SQL commands
         cursor = conn.cursor()
 
-        # Create the Messages table if it doesn't exist
-        cursor.execute(
-            f"""
-            INSERT INTO Messages (
-                entity_id, start_offset_id, last_offset_id, collection_start_timestamp, collection_end_timestamp
-            ) 
-            VALUES (
-                {entity_id}, {start_offset_id}, {last_offset_id}, {collection_start_timestamp}, {collection_end_timestamp}
-            )
-        """
-        )
-
-        # Commit the transaction and close the connection
-        conn.commit()
-        conn.close()
-    except sqlite3.DatabaseError as err:
-        raise err
-
-
-def iocs_insert_ioc(
-    message_id: int,
-    channel_id: int,
-    user_id: int,
-    ioc_type: str,
-    ioc_value: str,
-    message: str,
-    message_translated: str = None,
-):
-    """
-    Inserts a message and its IOC into the IOCs table in the database.
-
-    Args:
-        message_id: ID of the message the IOC is present in
-        channel_id: ID of the channel that the message is in
-        user_id: ID of the user who sent the message
-        ioc_type: the type of IOC
-        ioc_value: the specific substring text that is the IOC in the message
-        message: the full original text message
-        message_translated: the original message translated into English. None by default
-    """
-    try:
-        # Create or connect to the SQLite3 database
-        conn = sqlite3.connect(sqlite_db_name)
-
-        # Create a cursor object to execute SQL commands
-        cursor = conn.cursor()
-
-        # Create the IOCs table if it doesn't exist
-        # print(f"Inserting...")
-        # print(f"{message_id}, {channel_id}, {user_id}, {ioc_type}, {ioc_value}, {message}, {message_translated}")
-
-        # Define the SQL query with placeholders for parameters (parameterized query)
-        # Parameterized queries to handle characters such as colon (:)
+        # Define SQL query
         sql_query = """
-            INSERT INTO IOCs (
-                message_id,
-                channel_id,
-                user_id,
-                ioc_type,
-                ioc_value,
-                message,
-                message_translated
-            ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO Messages_collection (
+            entity_id, start_offset_id, last_offset_id, collection_start_timestamp, collection_end_timestamp
+        )
+        VALUES (?, ?, ?, ?, ?)
         """
-        # Execute the SQL query with parameters
+
+        # Insert into the table
         cursor.execute(
             sql_query,
             (
-                message_id,
-                channel_id,
-                user_id,
-                ioc_type,
-                ioc_value,
-                message,
-                message_translated,
+                entity_id,
+                start_offset_id,
+                last_offset_id,
+                collection_start_timestamp,
+                collection_end_timestamp,
             ),
         )
 
         # Commit the transaction and close the connection
         conn.commit()
-        conn.close()
     except sqlite3.DatabaseError as err:
-        raise err
+        raise f"Database error: {err}"
+    finally:
+        conn.close()
+
+
+def iocs_batch_insert(iocs: list[dict]):
+    """
+    Batch inserts IOCs into the database.
+
+    Args:
+        iocs: List of dictionaries, where each dictionary contains the IOC information.
+    """
+    try:
+        if iocs is None or len(iocs) == 0:
+            return
+
+        conn = sqlite3.connect(sqlite_db_name)
+        cursor = conn.cursor()
+
+        sql_query = """
+        INSERT INTO IOCs (message_id, channel_id, user_id, ioc_type, ioc_value, message, message_translated)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """
+
+        # Prepare a list of tuples from the list of dictionaries for batch insertion
+        iocs_values = [
+            (
+                ioc["message_id"],
+                ioc["channel_id"],
+                ioc["user_id"],
+                ioc["ioc_type"],
+                ioc["ioc_value"],
+                ioc["original_message"],
+                ioc["translated_message"],
+            )
+            for ioc in iocs
+        ]
+
+        cursor.executemany(sql_query, iocs_values)
+        conn.commit()
+    except sqlite3.DatabaseError as err:
+        raise f"Database error: {err}"
+    finally:
+        conn.close()
