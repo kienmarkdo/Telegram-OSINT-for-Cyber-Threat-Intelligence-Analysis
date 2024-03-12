@@ -27,11 +27,16 @@ class IOC(Enum):
     IPV4 = ("IPv4", r"(?:\d{1,3}\.){3}\d{1,3}")
     IPV6 = ("IPv6", r"(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}")
     URL = ("URL", r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+")
-    DOMAIN = ("Domain", r"\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?<!\.)\b")
+    DOMAIN = ( "Domain", r"\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b")
     HASH_SHA1 = ("SHA1", r"\b[0-9a-f]{40}\b")
     HASH_SHA256 = ("SHA256", r"\b[0-9a-f]{64}\b")
     HASH_MD5 = ("MD5", r"\b[0-9a-f]{32}\b")
     CVE = ("CVE", r"CVE-\d{4}-\d+\b", re.IGNORECASE)
+    EMAIL = ("Email", r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+    CRYPTO_BITCOIN = ("Bitcoin", r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b")
+    CRYPTO_DOGECOIN = ("Dogecoin", r"\bD{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}\b")
+    CRYPTO_ETHEREUM = ("Ethereum", r"\b0x[a-fA-F0-9]{40}\b")
+    CRYPTO_MONERO = ("Monero", r"\b[48][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{94}\b")
 
 
 def find_iocs(text: str) -> list[tuple[str]]:
@@ -113,3 +118,9 @@ if __name__ == "__main__":
     input6 = "Proxy IP Proxy Port Last Check Proxy Speed Proxy Country Anonymity 118.99.81.204118.99.81.204 8080 34 sec Indonesia - Tangerang Transparent 2.184.31.2 8080 58 sec Iran Transparent 93.126.11.189 8080 1 min Iran - Esfahan Transparent 202.118.236.130 7777 1 min China - Harbin Transparent 62.201.207.9 8080 1 min Iraq Transparent 219.143.244.170 8899 1 min China - Beijing Transparent 66.63.235.97 8080 1 min United States - Somerville Transparent 27.191.194.106 8080 1 min China Transparent 200.195.141.178 8080 2 min Brazil Transparent 210.101.131.232 8080 2 min South Korea - Seoul Transparent 218.75.205.44 9999 2 min China - Changsha Transparent212.119.97.198 3128 2 min Russia - Moscow Transparent 10.48.0.200 Your public IP address is 46.130.14.41 - Learn more"
     print(find_iocs(input6))
     print("---------------------------------------------------------------------")
+
+    input7 = "Pay me 0.1 bitcoin here 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa 1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2 3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5"  # bitcoin
+    input7 += "\nOr dogecoin DLCDJhnh6aGotar6b182jpzbNEyXb3C361"  # dogecoin
+    input7 += "\nOr ethereum 0x742d35Cc6634C0532925a3b844Bc454e4438f44e"  # ethereum
+    input7 += "\nOr monero 888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H 4AfUP827TeRZ1cck3tZThgZbRCEwBrpcJTkA1LCiyFVuMH4b5y59bKMZHGb9y58K3gSjWDCBsB4RkGsGDhsmMG5R2qmbLeW"  # monero
+    print(find_iocs(input7))
