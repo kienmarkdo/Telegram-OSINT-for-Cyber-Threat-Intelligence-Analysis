@@ -234,7 +234,7 @@ def rotate_proxy(client: TelegramClient) -> bool:
 
         # Set proxy
         logging.info(
-            f"Rotating to new {new_proxy['proxy_type']} proxy at {new_proxy['addr']}:{new_proxy['port']}"
+            f"Setting {new_proxy['proxy_type']} proxy at '{new_proxy['addr']}:{new_proxy['port']}'"
         )
         client.set_proxy(new_proxy)
 
