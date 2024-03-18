@@ -1,3 +1,7 @@
+"""
+Contains core helper functions required for the Telegram scraper to work.
+"""
+
 import datetime
 import json
 import logging

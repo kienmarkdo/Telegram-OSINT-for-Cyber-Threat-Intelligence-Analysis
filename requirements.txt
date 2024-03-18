@@ -5,6 +5,8 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 ctranslate2==3.20.0
+elastic-transport==8.12.0
+elasticsearch==8.12.1
 filelock==3.13.1
 fsspec==2024.2.0
 idna==3.6

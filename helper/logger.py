@@ -5,6 +5,7 @@ DATETIME_CODE_EXECUTED: str = str(
     datetime.datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")
 )
 OUTPUT_DIR: str = f"output/{DATETIME_CODE_EXECUTED}"
+OUTPUT_NDJSON: str = f"output_ndjson/{DATETIME_CODE_EXECUTED}"  # newline-delimited JSON for Elasticsearch
 
 
 def configure_logging():
