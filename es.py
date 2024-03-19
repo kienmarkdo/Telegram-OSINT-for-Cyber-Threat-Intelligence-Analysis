@@ -13,7 +13,7 @@ es = Elasticsearch(
 # print(es.info())  # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
 
 
-def index_json_file(file_path: str, index_name: str) -> bool:
+def index_json_file_to_es(file_path: str, index_name: str) -> bool:
     """
     Index a JSON file to Elasticsearch.
 

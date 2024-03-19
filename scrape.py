@@ -95,10 +95,10 @@ if __name__ == "__main__":
             # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.dialogs.DialogMethods.iter_dialogs
             # scrape_entities.scrape(client)
             for dialog in client.iter_dialogs():
-                if counter >= 5:
-                    break
-                else:
-                    counter += 1
+                # if counter >= 5:
+                #     break
+                # else:
+                #     counter += 1
 
                 entity: Channel | Chat | User = dialog.entity
                 # if entity.id != 1647639783 and entity.id != 1012147388:
@@ -107,8 +107,8 @@ if __name__ == "__main__":
                 #     continue
                 # if entity.id != 1503790351:  # sri lanka
                 #     continue
-                # if entity.id != 2016527483:  # my server
-                #     continue
+                if entity.id != 2016527483:  # my server
+                    continue
 
                 # Retrieve entity by its ID and display logs
                 # entity: Channel | User | Chat = client.get_entity(id)
@@ -131,8 +131,8 @@ if __name__ == "__main__":
                 #     break
                 # if entity.id == 1503790351:  # sri lanka 26k members
                 #     break
-                # if entity.id == 2016527483:
-                #     break
+                if entity.id == 2016527483:
+                    break
         logging.info(get_elapsed_time_message(start_time))
 
     except Exception as e:

@@ -2,6 +2,7 @@ import json
 import logging
 import os
 
+from es import index_json_file_to_es
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
@@ -46,7 +47,7 @@ def _collect(client: TelegramClient) -> list[dict]:
         raise
 
 
-def _download(data: list[dict], data_type: str) -> bool:
+def _download(data: list[dict], data_type: str) -> str:
     """
     Downloads collected entities into JSON files on the disk
 
@@ -55,7 +56,7 @@ def _download(data: list[dict], data_type: str) -> bool:
         data_type: string description of the type of data collected ("messages", "participants"...)
 
     Return:
-        True if the download was successful
+        The path of the downloaded JSON file
     """
     logging.info(f"[+] Downloading {COLLECTION_NAME} into JSON")
     try:
@@ -71,7 +72,7 @@ def _download(data: list[dict], data_type: str) -> bool:
 
         logging.info(f"{len(data)} {data_type} exported to {json_file_name}")
 
-        return True
+        return json_file_name
     except:
         logging.critical("[-] Failed to download the collected data into JSON files")
         raise
@@ -132,8 +133,9 @@ def scrape(client: TelegramClient) -> bool:
     collected_result: list[dict] = _collect(client)
     if collected_result is None or len(collected_result) == 0:
         raise
-    if _download(collected_result, "all_entities") is False:
-        raise
+
+    output_path: str = _download(collected_result, "all_entities")
+    index_json_file_to_es(output_path, "entities_index")
 
     logging.info(f"[+] Successfully completed full {COLLECTION_NAME} scraping process")
 

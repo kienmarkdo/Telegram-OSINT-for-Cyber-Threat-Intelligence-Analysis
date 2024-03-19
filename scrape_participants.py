@@ -5,7 +5,7 @@ import re
 import time
 from datetime import datetime
 from string import ascii_lowercase
-
+from es import index_json_file_to_es
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.tl.functions.channels import GetParticipantsRequest
@@ -201,10 +201,11 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
         participant_dict: dict = participant.to_dict()
         participants_list.append(participant_dict)
 
-    _download(participants_list, "participants", entity)
+    output_path: str = _download(participants_list, "participants", entity)
+    index_json_file_to_es(output_path, "users_index")
 
 
-def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> bool:
+def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> str:
     """
     Downloads collected participants into JSON files on the disk
 
@@ -214,7 +215,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
         entity: channel (public group or broadcast channel), chat (private group), user (direct message)
 
     Return:
-        True if the download was successful
+        The path of the downloaded JSON file
     """
     try:
         # Define the JSON file name
@@ -229,7 +230,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
 
         logging.info(f"{len(data)} {data_type} exported to {json_file_name}")
 
-        return True
+        return json_file_name
     except:
         logging.critical("[-] Failed to download the collected data into JSON files")
         raise

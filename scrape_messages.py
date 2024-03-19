@@ -21,7 +21,7 @@ from helper.helper import (
     get_entity_type_name,
     rotate_proxy,
 )
-from es import index_json_file
+from es import index_json_file_to_es
 from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
 from helper.translate import translate
 from helper.ioc import find_iocs
@@ -67,10 +67,11 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Store collected messages
         messages_collected: helpers.TotalList = None
 
-        # Main collection logic
+        # Begin collection
         logging.debug(f"Starting collection at offset value {offset_id_value}")
         logging.info(f"Max number of messages to be collected: {max_messages}")
 
+        # Main collection logic
         while True:
             # Proxy rotation...
             counter += 1
@@ -132,13 +133,16 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 extracted_iocs = _extract_iocs(message_dict)
                 all_iocs.extend(extracted_iocs)
 
+                # Insert found IOC(s) into current message
+                message_dict["iocs"] = extracted_iocs
+
         # Perform a batch database insert of all collected IOCs
         if len(all_iocs) > 0:
             iocs_batch_insert(all_iocs)
 
         output_path: str = _download(messages_list, entity)
         # _transform_to_ndjson(output_path, entity)
-        index_json_file(output_path, "messages_index")
+        index_json_file_to_es(output_path, "messages_index")
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
         logging.info(
