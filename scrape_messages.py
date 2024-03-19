@@ -21,6 +21,7 @@ from helper.helper import (
     get_entity_type_name,
     rotate_proxy,
 )
+from es import index_json_file
 from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
 from helper.translate import translate
 from helper.ioc import find_iocs
@@ -136,7 +137,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             iocs_batch_insert(all_iocs)
 
         output_path: str = _download(messages_list, entity)
-        _transform_to_ndjson(output_path, entity)
+        # _transform_to_ndjson(output_path, entity)
+        index_json_file(output_path, "messages_index")
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
         logging.info(
@@ -232,60 +234,6 @@ def _download(data: list[dict], entity: Channel | Chat | User) -> str:
     except:
         logging.error("[-] Failed to download the collected data into JSON files")
         raise
-
-
-def _transform_to_ndjson(json_file_path: str, entity: Channel | Chat | User):
-    """
-    Transforms a JSON formatted Telegram API response into a newline-delimited JSON
-    so that the data can be imported into Elasticsearch for data analysis.
-
-    Takes the path to a list JSON file as input and outputs a ndjson file
-    into an output folder.
-
-    Example input:
-    ```
-    [
-        {
-            "key1": values
-        },
-        {
-            "key1": values
-        }
-    ]
-    ```
-    Example output:
-    ```
-    {"key1": values}
-    {"key2": values}
-    ```
-
-
-    Args:
-        json_file_path: path to your JSON file
-
-    Returns:
-        True if the transformation and file output completed successfully
-    """
-    if json_file_path is None:
-        return False
-
-    ndjson_file_path = f"{OUTPUT_NDJSON}/{get_entity_type_name(entity)}_{entity.id}/{COLLECTION_NAME}_{entity.id}.json"
-
-    # Read the JSON data from the file
-    with open(json_file_path, "r") as file:
-        json_objects = json.load(file)
-
-    # Convert each JSON object into a newline-delimited string
-    ndjson_content = "\n".join(json.dumps(obj) for obj in json_objects)
-
-    # Check if directory exists, create it if necessary
-    os.makedirs(os.path.dirname(ndjson_file_path), exist_ok=True)
-
-    # Write the NDJSON content to the output file
-    with open(ndjson_file_path, "w") as ndjson_file:
-        ndjson_file.write(ndjson_content)
-
-    logging.info(f"Converted NDJSON saved to {ndjson_file_path}")
 
 
 def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
