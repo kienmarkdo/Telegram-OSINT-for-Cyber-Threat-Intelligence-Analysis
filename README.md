@@ -24,11 +24,18 @@ Set-ExecutionPolicy RemoteSigned
 - Install git and Python *version 3.11 or lower*.
 - Create virtual environment
     - `python -m venv venv`
-- Activate venv
-    - `source venv/Scripts/activate  # Windows git bash`
-    - `source venv/bin/activate  # UNIX` 
-- Deactivate venv
-    - `deactivate`
+    - Activate venv
+        - `source venv/Scripts/activate  # Windows git bash`
+        - `source venv/bin/activate  # UNIX` 
+    - Deactivate venv
+        - `deactivate`
+- Download library dependencies
+    - `pip install -r requirements.txt`
+    Optional: Download individual dependencies
+        - `pip install telethon`
+        - `pip install argostranslate`
+        - `pip install lingua-language-detector`
+        - `pip install requests`
 
 
 Create a `credentials.py` file. Paste and modify the code below accordingly.
