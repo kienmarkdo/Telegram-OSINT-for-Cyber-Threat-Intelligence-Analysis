@@ -113,12 +113,12 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
 
 if __name__ == "__main__":
 
-    index_json_file(
+    index_json_file_to_es(
         f"output/2024-03-18T04-21-06Z/public_group_2016527483/messages_2016527483.json",
         "messages_index",
     )
 
-    index_json_file(
+    index_json_file_to_es(
         f"output/2024-03-10T01-02-56Z/public_group_1012147388/messages_1012147388.json",
         "messages_index",
     )
