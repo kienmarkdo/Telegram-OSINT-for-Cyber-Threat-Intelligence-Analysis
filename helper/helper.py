@@ -11,10 +11,11 @@ from typing import (
     ContextManager,
 )  # to enable static typing with the "with" statement in Python
 
+from requests import get
 from telethon.sync import TelegramClient
 from telethon.types import *
 
-from credentials import API_HASH, API_ID, PHONE_NUMBER, PROXIES
+from credentials import API_HASH, API_ID, PROXIES
 
 
 class EntityName(Enum):
@@ -89,9 +90,12 @@ class TelegramClientContext(ContextManager[TelegramClient]):
     def __enter__(self) -> TelegramClient:
         api_id = API_ID
         api_hash = API_HASH
-        phone_number = PHONE_NUMBER
         session_name: str = None  # private var
         proxy: dict = None  # private var
+
+        # Display machine's public IP address (https://stackoverflow.com/a/36205547)
+        public_ip: str = get("https://api.ipify.org").content.decode("utf8")
+        logging.info(f"Collection public IP address '{public_ip}'")
 
         # Detect proxy in config file
         if PROXIES is not None and len(PROXIES) > 0:  # There exists at least one proxy
