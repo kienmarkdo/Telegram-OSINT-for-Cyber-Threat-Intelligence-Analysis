@@ -31,7 +31,7 @@ Set-ExecutionPolicy RemoteSigned
         - `deactivate`
 - Download library dependencies
     - `pip install -r requirements.txt`
-    Optional: Download individual dependencies
+    - Optional: Download individual dependencies
         - `pip install telethon`
         - `pip install argostranslate`
         - `pip install lingua-language-detector`
