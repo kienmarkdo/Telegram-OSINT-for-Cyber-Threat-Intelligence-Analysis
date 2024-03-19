@@ -122,6 +122,8 @@ if __name__ == "__main__":
                 # scrape_entities.scrape(client)
                 # scrape_entities.download_entity(entity)
                 scrape_messages.scrape(client, entity)
+                scrape_participants.scrape(client, entity)
+                scrape_entities.scrape(client)
                 print()
                 # scrape_participants.scrape(client, entity)
                 # print("------------------------------------------------------")

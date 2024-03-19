@@ -21,6 +21,8 @@ from helper.helper import (
 
 from helper.logger import OUTPUT_DIR
 
+COLLECTION_NAME: str = "participants"
+
 
 def _collect_all_under_10k(
     client: TelegramClient, entity: Channel | Chat | User
@@ -87,7 +89,8 @@ def _collect_all_under_10k(
         # logging.info(participant_dict)
         # break
 
-    _download(participants_list, "participants", entity)
+    output_path: str = _download(participants_list, "participants", entity)
+    index_json_file_to_es(output_path, "users_index")
 
 
 def _collect_all_over_10k(client, entity: Channel | Chat | User):
@@ -257,6 +260,10 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
+    logging.info(
+        "=========================================================================="
+    )
+    logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     if entity.participants_count <= 10000:
         _collect_all_under_10k(client, entity)
     else:
