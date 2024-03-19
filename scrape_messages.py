@@ -139,10 +139,15 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Perform a batch database insert of all collected IOCs
         if len(all_iocs) > 0:
             iocs_batch_insert(all_iocs)
-
+        
+        # Download data to JSON
+        iocs_output_path: str = _download(all_iocs, entity, "iocs")
         output_path: str = _download(messages_list, entity)
-        # _transform_to_ndjson(output_path, entity)
+
+        # Index data into Elasticsearch
         index_json_file_to_es(output_path, "messages_index")
+        index_json_file_to_es(iocs_output_path, "iocs_index")
+        exit()
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
         logging.info(
@@ -207,21 +212,22 @@ def _extract_iocs(message_obj: dict) -> list[dict]:
     return iocs_list
 
 
-def _download(data: list[dict], entity: Channel | Chat | User) -> str:
+def _download(data: list[dict], entity: Channel | Chat | User, data_type: str = COLLECTION_NAME) -> str:
     """
     Downloads collected messages into JSON files on the disk
 
     Args:
         data: list of collected objects (messages, participants...)
         entity: channel (public group or broadcast channel), chat (private group), user (direct message)
+        data_type: type of data that is being collected ("messages", "iocs")
 
     Return:
         The path of the downloaded JSON file
     """
-    logging.info(f"[+] Downloading {COLLECTION_NAME} into JSON: {entity.id}")
+    logging.info(f"[+] Downloading {data_type} into JSON: {entity.id}")
     try:
         # Define the JSON file name
-        json_file_name = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/{COLLECTION_NAME}_{entity.id}.json"
+        json_file_name = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/{data_type}_{entity.id}.json"
 
         # Check if directory exists, create it if necessary
         os.makedirs(os.path.dirname(json_file_name), exist_ok=True)
@@ -231,7 +237,7 @@ def _download(data: list[dict], entity: Channel | Chat | User) -> str:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
         logging.info(
-            f"{len(data)} {COLLECTION_NAME} successfully exported to {json_file_name}"
+            f"{len(data)} {data_type} successfully exported to {json_file_name}"
         )
 
         return json_file_name
