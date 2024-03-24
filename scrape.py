@@ -1,9 +1,7 @@
-import json
 import logging
 import os
 import time
 
-from telethon.sync import helpers
 from telethon.types import *
 
 import scrape_entities
@@ -12,12 +10,8 @@ import scrape_participants
 from credentials import PHONE_NUMBER
 from db import start_database
 from helper.helper import (
-    EntityName,
-    JSONEncoder,
     TelegramClientContext,
     get_entity_info,
-    get_entity_type_name,
-    rotate_proxy,
 )
 from helper.logger import configure_logging, OUTPUT_DIR
 
@@ -75,20 +69,11 @@ if __name__ == "__main__":
             # Connect to Telegram
             client.start(PHONE_NUMBER)
 
-            # print(client.get_me().stringify())
-            # print()
-            # logging.info(client.get_me().stringify())
-            # exit(-1)
-
             # Channel, Chat, User types explained: https://stackoverflow.com/questions/76683847/telethon-same-entity-type-for-a-group-and-channel-in-telethon
             #                                      https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html
             # Channel (Broadcast or Public Group): channel.broadcast == True/False
             # Chat    (Private group)            : No chat.username attribute
             # User    (User/DM)                  : No user.title attribute
-
-            # Example of Group/Channel name change/migration
-            # action=MessageActionChatMigrateTo(channel_id=2016527483)
-            # action=MessageActionChannelMigrateFrom(title='Harry Testing', chat_id=4199887938)
 
             # Iterate through all inboxes aka dialogs (DMs, public groups, private groups, broadcast channels)
             # https://docs.telethon.dev/en/stable/quick-references/client-reference.html#dialogs

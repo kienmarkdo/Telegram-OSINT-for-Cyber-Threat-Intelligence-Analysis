@@ -147,7 +147,6 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Index data into Elasticsearch
         index_json_file_to_es(output_path, "messages_index")
         index_json_file_to_es(iocs_output_path, "iocs_index")
-        exit()
 
         logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
         logging.info(
