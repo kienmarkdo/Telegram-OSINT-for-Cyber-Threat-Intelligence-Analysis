@@ -1,5 +1,6 @@
 # Other...
 credentials.py
+configs.py
 *.session
 *.session-journal
 *.csv
