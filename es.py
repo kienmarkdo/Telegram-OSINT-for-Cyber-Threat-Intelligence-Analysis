@@ -34,7 +34,7 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
             f"Cannot index JSON file to Elasticsearch due to missing configurations"
         )
         logging.warning(
-            f"Elasticsearch username, password, and CA certificate path have not been configured in credentials.py"
+            f"Elasticsearch username, password, and CA certificate path have not been configured in configs.py"
         )
         logging.warning(f"Do nothing")
         return False
