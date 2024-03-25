@@ -82,7 +82,6 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
                 logging.info(f"Rotating proxy...")
                 rotate_proxy(client)
                 counter = 0
-                break
 
             # Collect messages (reverse=True means oldest to newest)
             # Start at message with id offset_id, collect the next 'limit' messages
