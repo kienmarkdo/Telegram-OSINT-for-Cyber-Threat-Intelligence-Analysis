@@ -20,6 +20,9 @@ from helper.helper import (
     JSONEncoder,
     get_entity_type_name,
     rotate_proxy,
+    throttle,
+    max_messages,
+    export_to_es,
 )
 from es import index_json_file_to_es
 from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
@@ -50,10 +53,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Due to limitations with the API retrieving more than 3000 messages will take longer than usual
 
         # Collection configs
-        counter: int = -1  # Track number of API calls made
-        counter_max: int = 5  # Max API calls to make in this collection
+        counter: int = 0  # Track number of API calls made
+        # counter_max: int = 5  # Max API calls to make in this collection
         chunk_size: int = 500  # Number of messages to retrieve per iteration
-        max_messages: int = counter_max * chunk_size
+        # max_messages: int = counter_max * chunk_size
 
         # Proxy configs
         counter_rotate_proxy: int = 2  # Number of iterations until proxy rotation
@@ -75,7 +78,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         while True:
             # Proxy rotation...
             counter += 1
-            if counter >= counter_rotate_proxy:
+            if counter > counter_rotate_proxy:
                 logging.info(f"Rotating proxy...")
                 rotate_proxy(client)
                 counter = 0
@@ -102,14 +105,18 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # Next collection will begin with this "latest message collected" offset id
             offset_id_value = chunk[-1].to_dict()["id"]
 
-            if counter >= counter_max:
+            if max_messages is not None and len(messages_collected) >= max_messages:
                 logging.info(f"Reached max number of messages to be collected")
                 break
+
+            # Delay code execution/API calls to prevent bot detection by Telegram
+            throttle()
 
         # Post-collection logic
         if messages_collected is None or len(messages_collected) == 0:
             logging.info(f"There are no {COLLECTION_NAME} to collect. Skipping...")
             return True
+        logging.info(f"Number of API calls made: {counter}")
 
         # Convert the Message object to JSON and extract IOCs
         all_iocs: list[dict] = []  # extracted IOCs
@@ -139,16 +146,25 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Perform a batch database insert of all collected IOCs
         if len(all_iocs) > 0:
             iocs_batch_insert(all_iocs)
-        
+
         # Download data to JSON
         iocs_output_path: str = _download(all_iocs, entity, "iocs")
         output_path: str = _download(messages_list, entity)
 
         # Index data into Elasticsearch
-        index_json_file_to_es(output_path, "messages_index")
-        index_json_file_to_es(iocs_output_path, "iocs_index")
+        if export_to_es:
+            messages_index: str = "messages_index"
+            iocs_index: str = "iocs_index"
 
-        logging.info(f"Completed collection and downloading of {COLLECTION_NAME}")
+            logging.info(f"[+] Exporting data to Elasticsearch")
+            if index_json_file_to_es(output_path, messages_index):
+                logging.info(f"Exported messages to Elasticsearch as: {messages_index}")
+            if index_json_file_to_es(iocs_output_path, iocs_index):
+                logging.info(f"Exported IOCs to Elasticsearch as: {iocs_index}")
+
+        logging.info(
+            f"[+] Completed the collection, downloading, and exporting of {COLLECTION_NAME}"
+        )
         logging.info(
             f"Updating latest offset id for next collection as: {offset_id_value}"
         )
@@ -211,7 +227,9 @@ def _extract_iocs(message_obj: dict) -> list[dict]:
     return iocs_list
 
 
-def _download(data: list[dict], entity: Channel | Chat | User, data_type: str = COLLECTION_NAME) -> str:
+def _download(
+    data: list[dict], entity: Channel | Chat | User, data_type: str = COLLECTION_NAME
+) -> str:
     """
     Downloads collected messages into JSON files on the disk
 
@@ -262,9 +280,7 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    logging.info(
-        "=========================================================================="
-    )
+    logging.info("")
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     _collect(client, entity)
     logging.info(

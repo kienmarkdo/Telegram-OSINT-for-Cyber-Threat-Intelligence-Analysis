@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import random
+import time
 from enum import Enum
 from typing import (
     ContextManager,
@@ -15,7 +16,14 @@ from requests import get
 from telethon.sync import TelegramClient
 from telethon.types import *
 
-from credentials import API_HASH, API_ID, PROXIES
+from configs import API_HASH, API_ID, PROXIES
+
+# Default values for CLI argument variables
+# Declare vars here to reduce tight coupling (i.e.: passing through multiple function before being used)
+max_messages: int = 2500  # max number of messages to collect
+min_throttle: int = 1
+max_throttle: int = 10
+export_to_es: bool = False
 
 
 class EntityName(Enum):
@@ -258,3 +266,29 @@ def rotate_proxy(client: TelegramClient) -> bool:
         logging.critical(f"Failed to reconnect to Telegram during proxy rotation")
     except:
         logging.critical(f"Unknown error occured during proxy rotation")
+
+
+def throttle():
+    """
+    Delays code execution.
+
+    Used to throttle API calls to prevent API flooding, as Telegram could
+    ban the current account for bot behaviour or spamming. This function
+    throttles the code by a random number of seconds between a min_throttle
+    time and a max_throttle time. By default, the min. is 1 second and the
+    max. is 10 seconds. However, the values can be overriden in the CLI
+    with `python scrape.py ... --throttle-time <min_time> <max_time>`
+    """
+    min_throttle_ms: float = min_throttle * 1000  # 1 second is 1000 milliseconds
+    max_throttle_ms: float = max_throttle * 1000
+
+    # Generate a random delay between min_throttle_ms and max_throttle_ms
+    delay_ms = random.uniform(min_throttle_ms, max_throttle_ms)
+
+    # Convert milliseconds to seconds
+    delay_sec = delay_ms / 1000
+
+    logging.info(f"Delaying execution: {delay_sec} second(s)")
+    time.sleep(delay_sec)
+
+    return

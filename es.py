@@ -1,4 +1,4 @@
-from credentials import es_username, es_password, es_ca_cert_path
+from configs import es_username, es_password, es_ca_cert_path
 from elasticsearch import Elasticsearch, helpers
 import json
 import logging

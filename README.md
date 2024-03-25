@@ -38,7 +38,7 @@ Set-ExecutionPolicy RemoteSigned
         - `pip install requests`
 
 
-Create a `credentials.py` file. Paste and modify the code below accordingly.
+Create a `configs.py` file. Paste and modify the code below accordingly.
 ```py
 """
 Replace mandatory None values with your info. Ensure correct data types, as specified.
