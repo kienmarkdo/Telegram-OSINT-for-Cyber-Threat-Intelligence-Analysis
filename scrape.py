@@ -13,11 +13,9 @@ from db import start_database
 from helper.helper import (
     TelegramClientContext,
     get_entity_info,
-    max_messages,
-    min_throttle,
-    max_throttle,
-    export_to_es,
+    update_argument_variables,
 )
+from helper import helper
 from helper.logger import configure_logging, OUTPUT_DIR
 
 ###########################################################################################
@@ -44,8 +42,8 @@ parser.add_argument(
 parser.add_argument(
     "--max-messages",
     type=int,
-    default=max_messages,
-    help=f"Maximum number of messages to collect (default {max_messages}) (must be a multiple of 500)",
+    default=helper.max_messages,
+    help=f"Maximum number of messages to collect (default {helper.max_messages}) (must be a multiple of 500)",
 )
 parser.add_argument(
     "--max-entities",
@@ -57,15 +55,15 @@ parser.add_argument(
     "--throttle-time",
     nargs=2,
     type=int,
-    default=[min_throttle, max_throttle],
+    default=[helper.min_throttle, helper.max_throttle],
     metavar=("MIN_SECONDS", "MAX_SECONDS"),
-    help=f"Throttle time (in seconds) between API calls (default min: {min_throttle}, default max: {max_throttle})",
+    help=f"Throttle time (in seconds) between API calls (default min: {helper.min_throttle}, default max: {helper.max_throttle})",
 )
 parser.add_argument(
     "--export-to-es",
     action="store_true",
-    default=export_to_es,
-    help=f"Export results to Elasticsearch (default {export_to_es})",
+    default=helper.export_to_es,
+    help=f"Export results to Elasticsearch (default {helper.export_to_es})",
 )
 parser.add_argument(
     "--debug",
@@ -102,6 +100,11 @@ if args.get_messages and args.max_messages is None:
 
 if args.max_messages and args.max_messages % 500 != 0:
     parser.error(f"Error: The --max-messages argument must be a multiple of 500.")
+
+# Set variables
+update_argument_variables(
+    args.max_messages, args.throttle_time[0], args.throttle_time[1], args.export_to_es
+)
 
 
 ###########################################################################################
@@ -143,6 +146,15 @@ def setup() -> bool:
         logging.info(f"Debug mode set to {args.debug}")
         logging.debug(f"Set arguments: {vars(args)}")
 
+        # Set and log CLI configs
+        logging.info(
+            f"Running collection of: Messages '{args.get_messages}', Participants '{args.get_participants}', Entities '{args.get_entities}'"
+        )
+        logging.info(f"Set maximum entities to collect  : {args.max_entities}")
+        logging.info(f"Set export data to Elasticsearch : {helper.export_to_es}")
+        logging.info(f"Set minimum API throttle time    : {helper.min_throttle}")
+        logging.info(f"Set maxmimum API throttle time   : {helper.max_throttle}")
+
         return True
     except:
         raise
@@ -173,6 +185,10 @@ if __name__ == "__main__":
             # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.dialogs.DialogMethods.iter_dialogs
 
             if args.get_entities:
+                logging.info(
+                    f"=========================================================================="
+                )
+                logging.info(f"[+] Collecting metadata on all entities")
                 scrape_entities.scrape(client)
 
             for dialog in client.iter_dialogs():

@@ -21,10 +21,9 @@ from helper.helper import (
     get_entity_type_name,
     rotate_proxy,
     throttle,
-    max_messages,
-    export_to_es,
 )
 from es import index_json_file_to_es
+from helper import helper
 from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
 from helper.translate import translate
 from helper.ioc import find_iocs
@@ -72,7 +71,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
 
         # Begin collection
         logging.debug(f"Starting collection at offset value {offset_id_value}")
-        logging.info(f"Max number of messages to be collected: {max_messages}")
+        logging.info(f"Max number of messages to be collected: {helper.max_messages}")
 
         # Main collection logic
         while True:
@@ -104,7 +103,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # Next collection will begin with this "latest message collected" offset id
             offset_id_value = chunk[-1].to_dict()["id"]
 
-            if max_messages is not None and len(messages_collected) >= max_messages:
+            if (
+                helper.max_messages is not None
+                and len(messages_collected) >= helper.max_messages
+            ):
                 logging.info(f"Reached max number of messages to be collected")
                 break
 
@@ -151,15 +153,17 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         output_path: str = _download(messages_list, entity)
 
         # Index data into Elasticsearch
-        if export_to_es:
-            messages_index: str = "messages_index"
+        if helper.export_to_es:
+            index_name: str = "messages_index"
             iocs_index: str = "iocs_index"
 
             logging.info(f"[+] Exporting data to Elasticsearch")
-            if index_json_file_to_es(output_path, messages_index):
-                logging.info(f"Exported messages to Elasticsearch as: {messages_index}")
+            if index_json_file_to_es(output_path, index_name):
+                logging.info(
+                    f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}"
+                )
             if index_json_file_to_es(iocs_output_path, iocs_index):
-                logging.info(f"Exported IOCs to Elasticsearch as: {iocs_index}")
+                logging.info(f"Indexed IOCs to Elasticsearch as: {iocs_index}")
 
         logging.info(
             f"[+] Completed the collection, downloading, and exporting of {COLLECTION_NAME}"
@@ -279,7 +283,9 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if scrape was successful
     """
-    logging.info("")
+    logging.info(
+        "--------------------------------------------------------------------------"
+    )
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     _collect(client, entity)
     logging.info(

@@ -19,7 +19,6 @@ from telethon.types import *
 from configs import API_HASH, API_ID, PROXIES
 
 # Default values for CLI argument variables
-# Declare vars here to reduce tight coupling (i.e.: passing through multiple function before being used)
 max_messages: int = 2500  # max number of messages to collect
 min_throttle: int = 1
 max_throttle: int = 10
@@ -292,3 +291,19 @@ def throttle():
     time.sleep(delay_sec)
 
     return
+
+
+def update_argument_variables(
+    new_max_messages, new_min_throttle, new_max_throttle, new_export_to_es
+):
+    """
+    Update argument variables with values from CLI arguments.
+
+    For updated values, must reference them with "helper.VARIABLE".
+    For example, `helper.max_messages` will work.
+    """
+    global max_messages, min_throttle, max_throttle, export_to_es
+    max_messages = new_max_messages
+    min_throttle = new_min_throttle
+    max_throttle = new_max_throttle
+    export_to_es = new_export_to_es

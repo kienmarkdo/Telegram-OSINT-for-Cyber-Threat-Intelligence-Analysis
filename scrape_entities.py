@@ -7,11 +7,8 @@ from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
 
-from helper.helper import (
-    JSONEncoder,
-    get_entity_type_name,
-    rotate_proxy,
-)
+from helper.helper import JSONEncoder, get_entity_type_name
+from helper import helper
 
 from helper.logger import OUTPUT_DIR
 
@@ -127,7 +124,10 @@ def scrape(client: TelegramClient) -> bool:
     Return:
         True if scrape was successful
     """
-    logging.info("==========================================================================")
+    # logging.info("==========================================================================")
+    logging.info(
+        "--------------------------------------------------------------------------"
+    )
     logging.info(f"[+] Begin full {COLLECTION_NAME} scraping process")
 
     collected_result: list[dict] = _collect(client)
@@ -135,8 +135,14 @@ def scrape(client: TelegramClient) -> bool:
         raise
 
     output_path: str = _download(collected_result, "all_entities")
-    index_json_file_to_es(output_path, "entities_index")
 
-    logging.info(f"[+] Successfully completed full {COLLECTION_NAME} scraping process")
+    if helper.export_to_es:
+        index_name: str = "entities_index"
+        logging.info(f"[+] Exporting data to Elasticsearch")
+
+        if index_json_file_to_es(output_path, index_name):
+            logging.info(f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
+
+    logging.info(f"[+] Successfully scraped {COLLECTION_NAME}")
 
     return True

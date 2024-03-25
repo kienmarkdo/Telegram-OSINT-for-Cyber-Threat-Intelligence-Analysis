@@ -1,5 +1,5 @@
 import json
-import logging  # 2 TODO: Convert print statements to proper logging to a file
+import logging
 import os
 import re
 import time
@@ -19,6 +19,7 @@ from helper.helper import (
     rotate_proxy,
 )
 
+from helper import helper
 from helper.logger import OUTPUT_DIR
 
 COLLECTION_NAME: str = "participants"
@@ -90,7 +91,13 @@ def _collect_all_under_10k(
         # break
 
     output_path: str = _download(participants_list, "participants", entity)
-    index_json_file_to_es(output_path, "users_index")
+
+    # Index data into Elasticsearch
+    if helper.export_to_es:
+        index_name: str = "users_index"
+
+        if index_json_file_to_es(output_path, index_name):
+            logging.info(f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
 
 
 def _collect_all_over_10k(client, entity: Channel | Chat | User):
@@ -103,8 +110,8 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
     not broadcast channels, as subscribers are hidden from non-admin users at the API
     level and cannot be bypassed.
 
-    NOTE: Not implemented with the core Telethon API that collects an entity's participants, 
-    as it can only collect up to 10,000 participants in one call. Instead, this method uses 
+    NOTE: Not implemented with the core Telethon API that collects an entity's participants,
+    as it can only collect up to 10,000 participants in one call. Instead, this method uses
     custom tradecraft to achieve as close to 100% participants collection as possible.
 
     Args:
@@ -152,9 +159,38 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
     #                 pass
 
     #         offset += len(participants.users)
-    logging.warning(f"Not capable of collection 100% users in an entity with over 10,000 users yet")
+    logging.warning(
+        f"Not capable of collection 100% users in an entity with over 10,000 users yet"
+    )
     logging.info(f"[+] Participants collection in progress...")
-    queryKey = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    queryKey = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+    ]
     all_participants = []
     proxy_counter: int = 0
 
@@ -166,24 +202,27 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
             if proxy_counter == 3:
                 rotate_proxy(client)
 
-            participants = client(GetParticipantsRequest(
-                entity.id, ChannelParticipantsSearch(key), offset, limit,
-                hash=0
-            ))
+            participants = client(
+                GetParticipantsRequest(
+                    entity.id, ChannelParticipantsSearch(key), offset, limit, hash=0
+                )
+            )
             if not participants.users:
-                logging.info(f"Done searching for first names whose first English character is '{key}'")
+                logging.info(
+                    f"Done searching for first names whose first English character is '{key}'"
+                )
                 break
             for user in participants.users:
                 try:
                     if re.findall(r"\b[a-zA-Z]", user.first_name)[0].lower() == key:
                         all_participants.append(user)
-        
+
                 except:
                     pass
 
             offset += len(participants.users)
 
-    # After collection            
+    # After collection
 
     if all_participants is None or len(all_participants) == 0:
         logging.info(f"There are no participants to collect. Skipping...")
@@ -205,7 +244,13 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
         participants_list.append(participant_dict)
 
     output_path: str = _download(participants_list, "participants", entity)
-    index_json_file_to_es(output_path, "users_index")
+
+    # Index data to Elasticsearch
+    if helper.export_to_es:
+        index_name: str = "users_index"
+
+        if index_json_file_to_es(output_path, index_name):
+            logging.info(f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
 
 
 def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -> str:
@@ -261,12 +306,14 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         True if scrape was successful
     """
     logging.info(
-        "=========================================================================="
+        "--------------------------------------------------------------------------"
     )
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
     if entity.participants_count <= 10000:
         _collect_all_under_10k(client, entity)
     else:
-        logging.info(f"There are {entity.participants_count} users in this {get_entity_info(entity)}")
+        logging.info(
+            f"There are {entity.participants_count} users in this {get_entity_info(entity)}"
+        )
         logging.info(f"Please be patient while the collection runs...")
         _collect_all_over_10k(client, entity)
