@@ -7,6 +7,7 @@ import logging
 import os
 import time
 
+from concurrent.futures import ProcessPoolExecutor
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
@@ -29,6 +30,16 @@ from helper.translate import translate
 from helper.ioc import find_iocs
 
 COLLECTION_NAME: str = "messages"
+
+
+# Function to be executed in parallel
+def translate_message(message: dict):
+    original_message = message.get("message")
+    if original_message:
+        # Assuming translate() is a function that translates a message
+        translated_message = translate(original_message)
+        return translated_message
+    return None
 
 
 def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
@@ -122,27 +133,44 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Convert the Message object to JSON and extract IOCs
         all_iocs: list[dict] = []  # extracted IOCs
         messages_list: list[dict] = []
-        for message in messages_collected:
-            # Known message types: Message, MessageService
-            message_dict: dict = message.to_dict()
+        # for message in messages_collected:
+        #     # Known message types: Message, MessageService
+        #     message_dict: dict = message.to_dict()
 
-            # Translate message to English, if it is not already in English
-            original_message: str | None = message_dict.get("message")
-            if original_message is not None:
-                translated_message: str = translate(original_message)
-                if translated_message is not None:
-                    message_dict["message_translated"] = translated_message
+        #     # Translate message to English, if it is not already in English
+        #     original_message: str | None = message_dict.get("message")
+        #     if original_message is not None:
+        #         translated_message: str = translate(original_message)
+        #         if translated_message is not None:
+        #             message_dict["message_translated"] = translated_message
 
-            # Append to download list
+        #     # Append to download list
+        #     messages_list.append(message_dict)
+
+        #     # Extract any IOCs present in the message
+        #     if type(message) is Message:
+        #         extracted_iocs = _extract_iocs(message_dict)
+        #         all_iocs.extend(extracted_iocs)
+
+        #         # Insert found IOC(s) into current message
+        #         message_dict["iocs"] = extracted_iocs
+        # Collecting messages for translation
+        messages_to_translate = [message.to_dict() for message in messages_collected if message.to_dict().get("message")]
+
+        # Performing the translation in parallel
+        with ProcessPoolExecutor() as executor:
+            translated_messages = list(executor.map(translate_message, messages_to_translate))
+
+        # Updating messages with translated texts
+        for message_dict, translated in zip(messages_to_translate, translated_messages):
+            if translated:
+                message_dict["message_translated"] = translated
+
+            extracted_iocs = _extract_iocs(message_dict)
+            all_iocs.extend(extracted_iocs)
+            message_dict["iocs"] = extracted_iocs
             messages_list.append(message_dict)
 
-            # Extract any IOCs present in the message
-            if type(message) is Message:
-                extracted_iocs = _extract_iocs(message_dict)
-                all_iocs.extend(extracted_iocs)
-
-                # Insert found IOC(s) into current message
-                message_dict["iocs"] = extracted_iocs
 
         # Perform a batch database insert of all collected IOCs
         if len(all_iocs) > 0:

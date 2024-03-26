@@ -194,8 +194,7 @@ if __name__ == "__main__":
             for dialog in client.iter_dialogs():
                 if args.max_entities and entities_collected > args.max_entities:
                     break
-                else:
-                    entities_collected += 1
+                entities_collected += 1
 
                 entity: Channel | Chat | User = dialog.entity
                 # if entity.id != 1647639783 and entity.id != 1012147388:
@@ -204,7 +203,7 @@ if __name__ == "__main__":
                 #     continue
                 # if entity.id != 1503790351:  # sri lanka
                 #     continue
-                if entity.id != 2016527483:  # my server
+                if entity.id != 1721768523:  # real test
                     continue
                 logging.info(
                     f"=========================================================================="
@@ -224,8 +223,9 @@ if __name__ == "__main__":
                 #     break
                 # if entity.id == 1503790351:  # sri lanka 26k members
                 #     break
-                if entity.id == 2016527483:
+                if entity.id == 1721768523:
                     break
+        logging.info(f"Entities collected: {entities_collected}")
         logging.info(get_elapsed_time_message(start_time))
 
     except Exception as e:

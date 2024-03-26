@@ -40,6 +40,7 @@ def translate(text: str) -> str | None:
     ]
     detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()
     language_detected = detector.detect_language_of(text)
+    # language_detected = detector.detect_languages_in_parallel_of([text])
     # confidence_values = detector.compute_language_confidence_values(text)
     # for confidence in confidence_values:
     #     print(f"{confidence.language.name}: {confidence.value:.2f}")
@@ -86,6 +87,7 @@ def translate(text: str) -> str | None:
         # install_language(from_code)
 
     # Translate text
+    logging.debug(f"Translating: ", text)
     translatedText = argostranslate.translate.translate(text, from_code, to_code)
 
     return translatedText

@@ -159,8 +159,9 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
     #                 pass
 
     #         offset += len(participants.users)
+    
     logging.warning(
-        f"Not capable of collection 100% users in an entity with over 10,000 users yet"
+        f"Not capable of collecting 100% users in an entity with over 10,000 users yet"
     )
     logging.info(f"[+] Participants collection in progress...")
     queryKey = [
@@ -309,6 +310,14 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         "--------------------------------------------------------------------------"
     )
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
+    
+    # Check that entity type is not a broadcast channel
+    if get_entity_type_name(entity) == EntityName.BROADCAST_CHANNEL.value:
+        logging.info(
+            f"Cannot collect participants in {EntityName.BROADCAST_CHANNEL.value}. Skipping participants collection..."
+        )
+        return None
+    
     if entity.participants_count <= 10000:
         _collect_all_under_10k(client, entity)
     else:
@@ -317,3 +326,4 @@ def scrape(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         )
         logging.info(f"Please be patient while the collection runs...")
         _collect_all_over_10k(client, entity)
+    return True
