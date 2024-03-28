@@ -1,7 +1,11 @@
-from configs import es_username, es_password, es_ca_cert_path
-from elasticsearch import Elasticsearch, helpers
 import json
 import logging
+
+from elasticsearch import Elasticsearch, helpers
+from telethon.types import *
+
+from configs import es_ca_cert_path, es_password, es_username
+from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
 
 # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
 es = Elasticsearch(
@@ -57,58 +61,58 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
     return True
 
 
-# def transform_to_ndjson(json_file_path: str, entity: Channel | Chat | User):
-#     """
-#     Transforms a JSON formatted Telegram API response into a newline-delimited JSON
-#     so that the data can be imported into Elasticsearch for data analysis.
+def transform_to_ndjson(json_file_path: str):
+    """
+    Transforms a JSON formatted Telegram API response into a newline-delimited JSON
+    so that the data can be imported into Elasticsearch for data analysis.
 
-#     Takes the path to a list JSON file as input and outputs a ndjson file
-#     into an output folder.
+    Takes the path to a list JSON file as input and outputs a ndjson file
+    into an output folder.
 
-#     Example input:
-#     ```
-#     [
-#         {
-#             "key1": values
-#         },
-#         {
-#             "key1": values
-#         }
-#     ]
-#     ```
-#     Example output:
-#     ```
-#     {"key1": values}
-#     {"key2": values}
-#     ```
+    Example input:
+    ```
+    [
+        {
+            "key1": values
+        },
+        {
+            "key1": values
+        }
+    ]
+    ```
+    Example output:
+    ```
+    {"key1": values}
+    {"key2": values}
+    ```
 
 
-#     Args:
-#         json_file_path: path to your JSON file
+    Args:
+        json_file_path: path to your JSON file
 
-#     Returns:
-#         True if the transformation and file output completed successfully
-#     """
-#     if json_file_path is None:
-#         return False
+    Returns:
+        True if the transformation and file output completed successfully
+    """
+    if json_file_path is None:
+        return False
 
-#     ndjson_file_path = f"{OUTPUT_NDJSON}/{get_entity_type_name(entity)}_{entity.id}/{COLLECTION_NAME}_{entity.id}.json"
+    ndjson_file_path = json_file_path.replace(OUTPUT_DIR, OUTPUT_NDJSON)
 
-#     # Read the JSON data from the file
-#     with open(json_file_path, "r") as file:
-#         json_objects = json.load(file)
+    # Read the JSON data from the file
+    with open(json_file_path, "r") as file:
+        json_objects = json.load(file)
 
-#     # Convert each JSON object into a newline-delimited string
-#     ndjson_content = "\n".join(json.dumps(obj) for obj in json_objects)
+    # Convert each JSON object into a newline-delimited string
+    ndjson_content = "\n".join(json.dumps(obj) for obj in json_objects)
 
-#     # Check if directory exists, create it if necessary
-#     os.makedirs(os.path.dirname(ndjson_file_path), exist_ok=True)
+    # Check if directory exists, create it if necessary
+    os.makedirs(os.path.dirname(ndjson_file_path), exist_ok=True)
 
-#     # Write the NDJSON content to the output file
-#     with open(ndjson_file_path, "w") as ndjson_file:
-#         ndjson_file.write(ndjson_content)
+    # Write the NDJSON content to the output file
+    with open(ndjson_file_path, "w") as ndjson_file:
+        ndjson_file.write(ndjson_content)
 
-#     logging.info(f"Converted NDJSON saved to {ndjson_file_path}")
+    logging.info(f"Converted NDJSON saved to {ndjson_file_path}")
 
 
 if __name__ == "__main__":

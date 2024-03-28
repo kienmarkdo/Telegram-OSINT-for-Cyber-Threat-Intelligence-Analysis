@@ -1,5 +1,5 @@
-import logging
 import datetime
+import logging
 
 DATETIME_CODE_EXECUTED: str = str(
     datetime.datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")

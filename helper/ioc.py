@@ -3,8 +3,8 @@ Used for all things related to the analysis and extraction of Indicators of Comp
 from scraped Telegram messages.
 """
 
-from enum import Enum
 import re
+from enum import Enum
 
 
 class IOC(Enum):

@@ -191,6 +191,9 @@ def get_entity_info(entity: Channel | Chat | User) -> str:
 
 
 def generate_user_keys() -> list:
+    """
+    Generates keys to search users as part of users collection.
+    """
     a_z_underscore = []
     numbers = []
 

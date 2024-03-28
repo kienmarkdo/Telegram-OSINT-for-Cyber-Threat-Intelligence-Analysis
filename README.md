@@ -36,7 +36,7 @@ Set-ExecutionPolicy RemoteSigned
         - `pip install argostranslate`
         - `pip install lingua-language-detector`
         - `pip install requests`
-
+        - `pip install elasticsearch`
 
 Create a `configs.py` file. Paste and modify the code below accordingly.
 ```py

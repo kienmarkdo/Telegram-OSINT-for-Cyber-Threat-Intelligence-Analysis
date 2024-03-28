@@ -5,7 +5,7 @@ import re
 import time
 from datetime import datetime
 from string import ascii_lowercase
-from es import index_json_file_to_es
+from helper.es import index_json_file_to_es
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.tl.functions.channels import GetParticipantsRequest
@@ -62,11 +62,6 @@ def _collect_all_under_10k(
 
     all_participants: helpers.TotalList = None
     all_participants = client.get_participants(entity, limit=None)
-    # for participant in all_participants:
-    #     logging.info(participant)
-    #     break
-
-    # client.iter_participants()
 
     if all_participants is None or len(all_participants) == 0:
         logging.info(f"There are no participants to collect. Skipping...")
@@ -87,8 +82,6 @@ def _collect_all_under_10k(
     for participant in all_participants:
         participant_dict: dict = participant.to_dict()
         participants_list.append(participant_dict)
-        # logging.info(participant_dict)
-        # break
 
     output_path: str = _download(participants_list, "participants", entity)
 
@@ -121,45 +114,6 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
         True if collection was successful
     """
     # Collect participants https://github.com/LonamiWebs/Telethon/issues/580#issuecomment-362802359
-    # queryKey: list[str] = list(ascii_lowercase) + [":"]  # ["a", "b", "c", ... , "z"]
-    # queryKey = ["😂"]
-    # queryKey = ['а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я']
-    # queryKey = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    # limit: int = 200
-    # all_participants: list = []
-
-    # for key in queryKey:
-    #     offset = 0  # For each query, offest restarts at 0
-
-    #     while True:
-    #         participants: channels.ChannelParticipants = client(
-    #             GetParticipantsRequest(
-    #                 entity.id, ChannelParticipantsSearch(key), offset, limit, hash=0
-    #             )
-    #         )
-
-    #         if not participants.users:
-    #             logging.info(f"Done searching for '{key}'")
-    #             break  # No more participants left
-
-    #         for user in participants.users:
-    #             # Append users whose first name starts with current key character
-    #             try:
-    #                 # print(f"regex {re.findall(r"\b[a-zA-Z]", user.first_name)}")
-    #                 # print(f"user {user}")
-    #                 # exit(-1)
-    #                 # Looks at the user's firstname and checks if the first occuring English character after a word boundary matches the key.
-    #                 #   Example: "harry" returns ["h"], "h a r r y" returns ["h", "a", "r", "r", "y"]
-    #                 #   "😂 harry_ أهلاً вет " returns ["h"]
-    #                 #   "😂 أهلاً вет " returns [""]
-    #                 first_char = re.findall(r"\b[a-zA-Z]", user.first_name)[0].lower()
-    #                 if first_char == '':
-    #                     all_participants.append(user)
-    #             except:
-    #                 pass
-
-    #         offset += len(participants.users)
-    
     logging.warning(
         f"Not capable of collecting 100% users in an entity with over 10,000 users yet"
     )

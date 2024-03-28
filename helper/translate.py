@@ -9,12 +9,13 @@ sensitive data from various groups. As such, it is in the user's best interest t
 data private from translation services' servers.
 """
 
-from lingua import Language, LanguageDetectorBuilder, IsoCode639_1
-import argostranslate.argospm
+import logging
+
 import argostranslate.apis
+import argostranslate.argospm
 import argostranslate.package
 import argostranslate.translate
-import logging
+from lingua import Language, LanguageDetectorBuilder
 
 
 def translate(text: str) -> str | None:
@@ -32,21 +33,26 @@ def translate(text: str) -> str | None:
     if text is None or text == "":
         return None
 
-    # Attempts to detect the ISO 639 code of the source language (e.g. "en" for English)
+    # Attempt to detect the ISO 639 code of the source language (e.g. "en" for English)
+    # NOTE: Feel free to add/remove languages from this list as needed
     languages_to_detect = [
         Language.ENGLISH,
         Language.SPANISH,
         Language.RUSSIAN,
+        Language.GERMAN,
+        Language.ITALIAN,
+        Language.FRENCH,
+        Language.CHINESE,
+        Language.UKRAINIAN,
+        Language.SLOVAK,
     ]
+    # Store ISO 639 code of supported languages
+    # NOTE: Feel free to add/remove languages from this list as needed
+    languages_to_detect_code = [x.iso_code_639_1.name.lower() for x in languages_to_detect]
+
+    # Detect language
     detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()
     language_detected = detector.detect_language_of(text)
-    # language_detected = detector.detect_languages_in_parallel_of([text])
-    # confidence_values = detector.compute_language_confidence_values(text)
-    # for confidence in confidence_values:
-    #     print(f"{confidence.language.name}: {confidence.value:.2f}")
-    #     return None
-
-    # print(type(language_detected.iso_code_639_1.name.lower()))
 
     if language_detected is None:
         logging.debug(f"Unable to detect the language of this text")
@@ -69,7 +75,7 @@ def translate(text: str) -> str | None:
     logging.debug(
         f"Translating the following text from '{from_code}' to '{to_code}': {text}"
     )
-    if from_code not in ["en", "es", "ru"]:
+    if from_code not in languages_to_detect_code:
         logging.info(
             f"Unable to translate '{from_code}' -> {to_code}. "
             f"The translation package for '{from_code}' has not been installed."
@@ -77,7 +83,7 @@ def translate(text: str) -> str | None:
         logging.info(f"Skipping translation...")
         return (
             f"Requires manual translation. "
-            f"Have not installed the translation package for the detected language '{from_code}'."
+            f"Translation for the following language is not yet supported '{from_code}'."
         )
         # logging.info(
         #     f"New language detected. Installing language package: '{from_code}'"

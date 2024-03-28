@@ -2,14 +2,12 @@ import json
 import logging
 import os
 
-from es import index_json_file_to_es
 from telethon import TelegramClient
-from telethon.sync import helpers
 from telethon.types import *
 
-from helper.helper import JSONEncoder, get_entity_type_name
 from helper import helper
-
+from helper.es import index_json_file_to_es
+from helper.helper import JSONEncoder, get_entity_type_name
 from helper.logger import OUTPUT_DIR
 
 COLLECTION_NAME: str = "entities"

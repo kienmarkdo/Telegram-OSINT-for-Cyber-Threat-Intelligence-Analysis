@@ -9,14 +9,14 @@ import scrape_entities
 import scrape_messages
 import scrape_participants
 from configs import PHONE_NUMBER
-from db import start_database
+from helper import helper
+from helper.db import start_database
 from helper.helper import (
     TelegramClientContext,
     get_entity_info,
     update_argument_variables,
 )
-from helper import helper
-from helper.logger import configure_logging, OUTPUT_DIR
+from helper.logger import OUTPUT_DIR, configure_logging
 
 ###########################################################################################
 # Create the ArgumentParser object to parse command line arguments

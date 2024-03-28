@@ -6,28 +6,23 @@ import json
 import logging
 import os
 import time
-
 from concurrent.futures import ProcessPoolExecutor
+
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.types import *
 
-from db import (
+from helper import helper
+from helper.db import (
+    iocs_batch_insert,
     messages_collection_get_offset_id,
     messages_collection_insert_offset_id,
-    iocs_batch_insert,
 )
-from helper.helper import (
-    JSONEncoder,
-    get_entity_type_name,
-    rotate_proxy,
-    throttle,
-)
-from es import index_json_file_to_es
-from helper import helper
-from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
-from helper.translate import translate
+from helper.es import index_json_file_to_es
+from helper.helper import JSONEncoder, get_entity_type_name, rotate_proxy, throttle
 from helper.ioc import find_iocs
+from helper.logger import OUTPUT_DIR
+from helper.translate import translate
 
 COLLECTION_NAME: str = "messages"
 
@@ -133,33 +128,15 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Convert the Message object to JSON and extract IOCs
         all_iocs: list[dict] = []  # extracted IOCs
         messages_list: list[dict] = []
-        # for message in messages_collected:
-        #     # Known message types: Message, MessageService
-        #     message_dict: dict = message.to_dict()
 
-        #     # Translate message to English, if it is not already in English
-        #     original_message: str | None = message_dict.get("message")
-        #     if original_message is not None:
-        #         translated_message: str = translate(original_message)
-        #         if translated_message is not None:
-        #             message_dict["message_translated"] = translated_message
-
-        #     # Append to download list
-        #     messages_list.append(message_dict)
-
-        #     # Extract any IOCs present in the message
-        #     if type(message) is Message:
-        #         extracted_iocs = _extract_iocs(message_dict)
-        #         all_iocs.extend(extracted_iocs)
-
-        #         # Insert found IOC(s) into current message
-        #         message_dict["iocs"] = extracted_iocs
         # Collecting messages for translation
         messages_to_translate = [message.to_dict() for message in messages_collected if message.to_dict().get("message")]
 
         # Performing the translation in parallel
         with ProcessPoolExecutor() as executor:
-            translated_messages = list(executor.map(translate_message, messages_to_translate))
+            translated_messages = list(
+                executor.map(translate_message, messages_to_translate)
+            )
 
         # Updating messages with translated texts
         for message_dict, translated in zip(messages_to_translate, translated_messages):
@@ -168,9 +145,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
 
             extracted_iocs = _extract_iocs(message_dict)
             all_iocs.extend(extracted_iocs)
-            message_dict["iocs"] = extracted_iocs
+            # message_dict["iocs"] = extracted_iocs  # NOTE: Uncomment to insert IOCs directly into the Messages JSON file
             messages_list.append(message_dict)
-
 
         # Perform a batch database insert of all collected IOCs
         if len(all_iocs) > 0:
@@ -240,7 +216,6 @@ def _extract_iocs(message_obj: dict) -> list[dict]:
         Returns the list of IOCs present in the message
     """
     iocs_list: list[dict] = []
-    # print(f"checking ioc...")
     iocs = find_iocs(message_obj["message"])
 
     for ioc_type, ioc_value in iocs:
