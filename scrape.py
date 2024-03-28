@@ -66,6 +66,12 @@ parser.add_argument(
     help=f"Export results to Elasticsearch (default {helper.export_to_es})",
 )
 parser.add_argument(
+    "--entities",
+    nargs="+",
+    type=int,
+    help="Specify entity IDs to collect messages and participants from (i.e.: --entities <id1> <id2>  # scrapes entities with <id1> and <id2>)",
+)
+parser.add_argument(
     "--debug",
     action="store_true",
     default=False,
@@ -150,6 +156,7 @@ def setup() -> bool:
         logging.info(
             f"Running collection of: Messages '{args.get_messages}', Participants '{args.get_participants}', Entities '{args.get_entities}'"
         )
+        logging.info(f"Set list of entities to collect  : {args.entities}")
         logging.info(f"Set maximum entities to collect  : {args.max_entities}")
         logging.info(f"Set export data to Elasticsearch : {helper.export_to_es}")
         logging.info(f"Set minimum API throttle time    : {helper.min_throttle}")
@@ -168,7 +175,9 @@ if __name__ == "__main__":
         raise "[-] Failed to setup the environment. Cannot begin collection."
 
     try:
-        entities_collected: int = 0
+        entities_collected: int = 0  # Number of entities to collect (most recent first)
+
+        # Start the Telegram client to iteract with its APIs
         with TelegramClientContext() as client:
 
             # Connect to Telegram
@@ -191,40 +200,38 @@ if __name__ == "__main__":
                 logging.info(f"[+] Collecting metadata on all entities")
                 scrape_entities.scrape(client)
 
+            # Entity IDs from which to scrape, if specified in CLI arguments
+            entity_ids_to_scrape: set[int] | None = (
+                set(args.entities) if args.entities else None
+            )  # None means scrape all entities since no specific list of entities were provided in the CLI arguments
+
+            # Iterate through all entities that the user is in
             for dialog in client.iter_dialogs():
-                if args.max_entities and entities_collected > args.max_entities:
-                    break
-                entities_collected += 1
+                # If the current entity/dialog is in list of entities to scape from (specified in CLI arguments)
+                #  and the number of entities do not exceed the max. number of entities to scrape from (specified in CLI arguments)
+                if (
+                    entity_ids_to_scrape is None
+                    or dialog.entity.id in entity_ids_to_scrape
+                ) and not (
+                    args.max_entities and entities_collected > args.max_entities
+                ):
+                    entities_collected += 1
 
-                entity: Channel | Chat | User = dialog.entity
-                # if entity.id != 1647639783 and entity.id != 1012147388:
-                #     continue
-                # if entity.id != 1012147388:  # whalepool
-                #     continue
-                # if entity.id != 1503790351:  # sri lanka
-                #     continue
-                if entity.id != 1721768523:  # real test
-                    continue
-                logging.info(
-                    f"=========================================================================="
-                )
-                logging.info(f"[+] Collection in progress: {get_entity_info(entity)}")
+                    entity: Channel | Chat | User = dialog.entity
+                    logging.info(
+                        f"=========================================================================="
+                    )
+                    logging.info(
+                        f"[+] Collection in progress: {get_entity_info(entity)}"
+                    )
 
-                if args.get_messages:
-                    scrape_messages.scrape(client, entity)
-                if args.get_participants:
-                    scrape_participants.scrape(client, entity)
+                    if args.get_messages:
+                        scrape_messages.scrape(client, entity)
+                    if args.get_participants:
+                        scrape_participants.scrape(client, entity)
 
-                # scrape_entities.download_entity(entity)
-                # print("------------------------------------------------------")
-                # if entity.id == 1647639783:  # russian
-                #     break
-                # if entity.id == 1012147388:
-                #     break
-                # if entity.id == 1503790351:  # sri lanka 26k members
-                #     break
-                if entity.id == 1721768523:
-                    break
+                    # scrape_entities.download_entity(entity)  # NOTE: Uncomment to download this entity's metadata
+
         logging.info(f"Entities collected: {entities_collected}")
         logging.info(get_elapsed_time_message(start_time))
 
