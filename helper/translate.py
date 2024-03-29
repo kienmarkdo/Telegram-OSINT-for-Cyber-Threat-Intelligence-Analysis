@@ -51,7 +51,9 @@ def translate(text: str) -> str | None:
     languages_to_detect_code = [x.iso_code_639_1.name.lower() for x in languages_to_detect]
 
     # Detect language
-    detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()
+    # detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()  # Detect listed languages
+    # detector = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_models().build()  # Detect all languages available in the library (eager loading)
+    detector = LanguageDetectorBuilder.from_all_languages().build()  # Detect all languages available in the library (lazy loading)
     language_detected = detector.detect_language_of(text)
 
     if language_detected is None:
