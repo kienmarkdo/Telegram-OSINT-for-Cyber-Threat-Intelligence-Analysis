@@ -78,6 +78,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Begin collection
         logging.debug(f"Starting collection at offset value {offset_id_value}")
         logging.info(f"Max number of messages to be collected: {helper.max_messages}")
+        if helper.max_messages is None:
+            logging.info(f"Collect all messages in this entity's entire history")
 
         # Main collection logic
         while True:

@@ -29,8 +29,18 @@ parser = argparse.ArgumentParser(
 # Add arguments
 # NOTE: Arguments can be referenced in the code i.e. --get-messages is args.get_messages
 parser.add_argument(
-    "--get-messages", action="store_true", help="Collect all messages in an entity"
+    "--get-messages",
+    nargs="?",  # "?" means optional argument, accepts a single value
+    const=True,
+    default=False,
+    type=lambda x: (
+        int(x)
+        if (int(x) % 500 == 0)
+        else parser.error("Error: --get-messages must be a multiple of 500.")
+    ),
+    help="Collect all messages in an entity, optionally specify max messages to collect as a multiple of 500",
 )
+
 parser.add_argument(
     "--get-participants",
     action="store_true",
@@ -38,12 +48,6 @@ parser.add_argument(
 )
 parser.add_argument(
     "--get-entities", action="store_true", help="Collect all entities' metadata"
-)
-parser.add_argument(
-    "--max-messages",
-    type=int,
-    default=helper.max_messages,
-    help=f"Maximum number of messages to collect (default {helper.max_messages}) (must be a multiple of 500)",
 )
 parser.add_argument(
     "--max-entities",
@@ -96,21 +100,24 @@ if args.throttle_time and (
         "Error: Both minimum and maximum seconds must be specified for throttle time."
     )
 
-# Check if max messages is specified without get messages
-if args.max_messages is not None and not args.get_messages:
-    parser.error("Error: --max-messages can only be specified with --get-messages.")
-
-# If --get-messages is specified, but --max-messages is not, set it to None
-if args.get_messages and args.max_messages is None:
-    args.max_messages = None
-
-if args.max_messages and args.max_messages % 500 != 0:
-    parser.error(f"Error: The --max-messages argument must be a multiple of 500.")
-
-# Set variables
-update_argument_variables(
-    args.max_messages, args.throttle_time[0], args.throttle_time[1], args.export_to_es
-)
+# Set values of argument variables
+if args.get_messages is True:
+    # Collect all messages without limit
+    update_argument_variables(
+        None, args.throttle_time[0], args.throttle_time[1], args.export_to_es
+    )
+elif isinstance(args.get_messages, int):
+    # Collect messages up to the specified limit
+    max_messages = args.get_messages
+    update_argument_variables(
+        max_messages, args.throttle_time[0], args.throttle_time[1], args.export_to_es
+    )
+else:
+    # --get-messages not specified, do not collect messages
+    max_messages = 0
+    update_argument_variables(
+        max_messages, args.throttle_time[0], args.throttle_time[1], args.export_to_es
+    )
 
 
 ###########################################################################################
@@ -156,6 +163,8 @@ def setup() -> bool:
         logging.info(
             f"Running collection of: Messages '{args.get_messages}', Participants '{args.get_participants}', Entities '{args.get_entities}'"
         )
+        if args.get_messages:
+            logging.info(f"Max number of messages to collect: {helper.max_messages}")
         logging.info(f"Set list of entities to collect  : {args.entities}")
         logging.info(f"Set maximum entities to collect  : {args.max_entities}")
         logging.info(f"Set export data to Elasticsearch : {helper.export_to_es}")

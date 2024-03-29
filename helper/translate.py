@@ -45,15 +45,20 @@ def translate(text: str) -> str | None:
         Language.CHINESE,
         Language.UKRAINIAN,
         Language.SLOVAK,
+        Language.DUTCH,
+        Language.TURKISH,
+        Language.DANISH,
     ]
     # Store ISO 639 code of supported languages
     # NOTE: Feel free to add/remove languages from this list as needed
     languages_to_detect_code = [x.iso_code_639_1.name.lower() for x in languages_to_detect]
+    # NOTE: All languages (WARNING. USES A LOT OF RAM AND CPU)
+    # languages_to_detect_code = [x.iso_code_639_1.name.lower() for x in Language.all()]  # ['en', 'fr',...] all 75 langs
 
     # Detect language
-    # detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()  # Detect listed languages
+    detector = LanguageDetectorBuilder.from_languages(*languages_to_detect).build()  # Detect listed languages
     # detector = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_models().build()  # Detect all languages available in the library (eager loading)
-    detector = LanguageDetectorBuilder.from_all_languages().build()  # Detect all languages available in the library (lazy loading)
+    # detector = LanguageDetectorBuilder.from_all_languages().build()  # Detect all languages available in the library (lazy loading)
     language_detected = detector.detect_language_of(text)
 
     if language_detected is None:
@@ -88,11 +93,11 @@ def translate(text: str) -> str | None:
             f"Translation for the following language is not yet supported '{from_code}'."
         )
         # logging.info(
-        #     f"New language detected. Installing language package: '{from_code}'"
+        #     f"New language detected. Installing language translation package: '{from_code}'"
         # )
         # # Download the language if it is supported
-        # if from_code in
-        # install_language(from_code)
+        # if from_code in get_installed_languages()
+        #     install_language(from_code)
 
     # Translate text
     logging.debug(f"Translating: ", text)
