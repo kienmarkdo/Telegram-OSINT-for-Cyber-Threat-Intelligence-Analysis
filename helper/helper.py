@@ -251,8 +251,9 @@ def rotate_proxy(client: TelegramClient) -> bool:
         new_proxy = random.choice(PROXIES)
 
         # Set proxy
+        logging.info(f"[+] Rotating proxy...")
         logging.info(
-            f"Setting {new_proxy['proxy_type']} proxy at '{new_proxy['addr']}:{new_proxy['port']}'"
+            f"[+] Setting {new_proxy['proxy_type']} proxy at '{new_proxy['addr']}:{new_proxy['port']}'"
         )
         client.set_proxy(new_proxy)
 
@@ -262,12 +263,12 @@ def rotate_proxy(client: TelegramClient) -> bool:
         if client.is_connected():
             return True
         else:
-            logging.error(f"Unknown error occured during proxy rotation...")
+            logging.error(f"[-] Unknown error occured during proxy rotation...")
             return False
     except OSError:
-        logging.critical(f"Failed to reconnect to Telegram during proxy rotation")
+        logging.critical(f"[-] Failed to reconnect to Telegram during proxy rotation")
     except:
-        logging.critical(f"Unknown error occured during proxy rotation")
+        logging.critical(f"[-] Unknown error occured during proxy rotation")
 
 
 def throttle():
@@ -291,6 +292,7 @@ def throttle():
     delay_sec = delay_ms / 1000
 
     logging.info(f"Delaying execution: {delay_sec} second(s)")
+    logging.info(f"")
     time.sleep(delay_sec)
 
     return

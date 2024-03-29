@@ -139,7 +139,7 @@ def scrape(client: TelegramClient) -> bool:
         logging.info(f"[+] Exporting data to Elasticsearch")
 
         if index_json_file_to_es(output_path, index_name):
-            logging.info(f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
+            logging.info(f"[+] Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
 
     logging.info(f"[+] Successfully scraped {COLLECTION_NAME}")
 

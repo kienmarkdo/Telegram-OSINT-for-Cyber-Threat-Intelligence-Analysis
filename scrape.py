@@ -237,10 +237,17 @@ if __name__ == "__main__":
                     if args.get_messages:
                         scrape_messages.scrape(client, entity)
                     if args.get_participants:
-                        scrape_participants.scrape(client, entity)
+                        if args.get_messages:
+                            scrape_participants.scrape(client, entity, True)
+                        else:
+                            scrape_participants.scrape(client, entity, False)
 
                     # scrape_entities.download_entity(entity)  # NOTE: Uncomment to download this entity's metadata
 
+        logging.info(
+            f"=========================================================================="
+        )
+        logging.info(f"Collection completed!")
         logging.info(f"Entities collected: {entities_collected}")
         logging.info(get_elapsed_time_message(start_time))
 

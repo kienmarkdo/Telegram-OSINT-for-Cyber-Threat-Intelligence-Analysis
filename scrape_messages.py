@@ -27,11 +27,15 @@ from helper.translate import translate
 COLLECTION_NAME: str = "messages"
 
 
-# Function to be executed in parallel
-def translate_message(message: dict):
+def _translate_message(message: dict):
+    """
+    Translate a message. Function to be executed in parallel.
+
+    Args:
+        message: a message object
+    """
     original_message = message.get("message")
     if original_message:
-        # Assuming translate() is a function that translates a message
         translated_message = translate(original_message)
         return translated_message
     return None
@@ -64,7 +68,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # max_messages: int = counter_max * chunk_size
 
         # Proxy configs
-        counter_rotate_proxy: int = 2  # Number of iterations until proxy rotation
+        counter_rotate_proxy: int = 2  # Number of iterations/API calls until proxy rotation
 
         # Tracking offset
         start_offset_id: int = messages_collection_get_offset_id(entity.id)
@@ -85,10 +89,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         while True:
             # Proxy rotation...
             counter += 1
-            if counter > counter_rotate_proxy:
-                logging.info(f"Rotating proxy...")
+            if counter % counter_rotate_proxy == 0:
                 rotate_proxy(client)
-                counter = 0
 
             # Collect messages (reverse=True means oldest to newest)
             # Start at message with id offset_id, collect the next 'limit' messages
@@ -135,9 +137,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         messages_to_translate = [message.to_dict() for message in messages_collected if message.to_dict().get("message")]
 
         # Performing the translation in parallel
+        logging.info(f"Translating messages into English (this may take some time)...")
         with ProcessPoolExecutor() as executor:
             translated_messages = list(
-                executor.map(translate_message, messages_to_translate)
+                executor.map(_translate_message, messages_to_translate)
             )
 
         # Updating messages with translated texts
@@ -150,9 +153,9 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             # message_dict["iocs"] = extracted_iocs  # NOTE: Uncomment to insert IOCs directly into the Messages JSON file
             messages_list.append(message_dict)
 
-        # Perform a batch database insert of all collected IOCs
-        if len(all_iocs) > 0:
-            iocs_batch_insert(all_iocs)
+        # # Perform a batch database insert of all collected IOCs
+        # if len(all_iocs) > 0:
+        #     iocs_batch_insert(all_iocs)
 
         # Download data to JSON
         iocs_output_path: str = _download(all_iocs, entity, "iocs")
@@ -166,10 +169,10 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
             logging.info(f"[+] Exporting data to Elasticsearch")
             if index_json_file_to_es(output_path, index_name):
                 logging.info(
-                    f"Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}"
+                    f"[+] Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}"
                 )
             if index_json_file_to_es(iocs_output_path, iocs_index):
-                logging.info(f"Indexed IOCs to Elasticsearch as: {iocs_index}")
+                logging.info(f"[+] Indexed IOCs to Elasticsearch as: {iocs_index}")
 
         logging.info(
             f"[+] Completed the collection, downloading, and exporting of {COLLECTION_NAME}"
