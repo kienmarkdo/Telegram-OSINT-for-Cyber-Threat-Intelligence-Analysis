@@ -37,6 +37,7 @@ Set-ExecutionPolicy RemoteSigned
         - `pip install lingua-language-detector`
         - `pip install requests`
         - `pip install elasticsearch`
+        - `pip install ijson`
 
 Create a `configs.py` file. Paste and modify the code below accordingly.
 ```py
