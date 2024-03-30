@@ -53,6 +53,8 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
     Return:
         True if collection was successful
     """
+    # Pre-define minimal variable(s) for emergency data recovery in exception handling
+    messages_collected: helpers.TotalList = None
     try:
         logging.info(f"[+] Collecting {COLLECTION_NAME} from Telethon API")
 
@@ -68,7 +70,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # max_messages: int = counter_max * chunk_size
 
         # Proxy configs
-        counter_rotate_proxy: int = 2  # Number of iterations/API calls until proxy rotation
+        counter_rotate_proxy: int = 2  # Number of API calls until proxy rotation
 
         # Tracking offset
         start_offset_id: int = messages_collection_get_offset_id(entity.id)
@@ -134,7 +136,11 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         messages_list: list[dict] = []
 
         # Collecting messages for translation
-        messages_to_translate = [message.to_dict() for message in messages_collected if message.to_dict().get("message")]
+        messages_to_translate = [
+            message.to_dict()
+            for message in messages_collected
+            if message.to_dict().get("message")
+        ]
 
         # Performing the translation in parallel
         logging.info(f"Translating messages into English (this may take some time)...")
@@ -195,6 +201,18 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         logging.critical(
             "[-] Failed to collect data from Telegram API for unknown reasons"
         )
+        logging.info(
+            f"Attempting to recover any partially collected messages stored in memory and downloading them to disk..."
+        )
+        logging.info(f"This data will be re-collected in the next collection run")
+        # -- Download data to JSON
+        # Convert the collected object to JSON
+        messages_list: list[dict] = []
+        for message in messages_collected:
+            message_dict: dict = message.to_dict()
+            messages_list.append(message_dict)
+        _download(messages_list, entity)
+        logging.info(f"Download complete")
         raise
 
 
