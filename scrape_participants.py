@@ -66,7 +66,7 @@ def _collect_all_under_10k(
     all_participants = client.get_participants(entity, limit=None)
 
     if all_participants is None or len(all_participants) == 0:
-        logging.info(f"There are no participants to collect. Skipping...")
+        logging.info(f"No public participants were collected. Skipping...")
         return True
     else:
         # Evaluate percentage of participants successfully collected
@@ -233,7 +233,7 @@ def _download(data: list[dict], data_type: str, entity: Channel | Chat | User) -
         with open(json_file_name, "w") as json_file:
             json.dump(data, json_file, cls=JSONEncoder, indent=2)
 
-        logging.info(f"{len(data)} {data_type} exported to {json_file_name}")
+        logging.info(f"{len(data)} {data_type} successfully exported to {json_file_name}")
 
         return json_file_name
     except:
@@ -295,7 +295,7 @@ def scrape_participants_from_messages(
     collected_participants: list = []
 
     logging.info(
-        f"Calling GetUsersRequest API to get information on all collected users"
+        f"Number of participants found in messages: {len(collected_user_ids)}"
     )
     # Use the GetFullUserRequest API to get one user's info
     # collected_participants = client(GetUsersRequest(collected_user_ids))
@@ -306,6 +306,7 @@ def scrape_participants_from_messages(
     for i in range(0, len(collected_user_ids), chunk_size):
         # Get the chunk of user IDs
         chunk = collected_user_ids[i:i+chunk_size]
+        logging.info(f"Getting information on {len(chunk)} users...")
 
         # Use the GetUsersRequest API to get user info for the chunk
         collected_participants.extend(client(GetUsersRequest(chunk)))
@@ -322,7 +323,7 @@ def scrape_participants_from_messages(
         return True
     else:
         collected_amount: int = len(collected_participants)
-        logging.info(f"Successfully collected {collected_amount} more participants")
+        logging.info(f"Successfully collected {collected_amount} participants from messages")
 
     # Download the collected data to JSON, or append to existing JSON
     participants_json_filename: str = (
