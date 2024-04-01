@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 
@@ -15,6 +16,116 @@ es = Elasticsearch(
 )  # Update with your credentials
 
 # print(es.info())  # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
+
+
+def get_index_mapping(index_name: str) -> dict:
+    """
+    Generates a dictionary index mapping for the specified index.
+
+    Example usage:
+    ```python
+    index_name='new_index'
+    body = {
+                "mappings": {...}  # define mappings here
+            }
+    es.indices.create(index_name, body)
+    # Based on https://discuss.elastic.co/t/specify-mappings-while-creating-index-using-python-client/292433
+    ```
+
+    Supported indicies
+        - messages_index
+        - iocs_index
+        - users_index
+        - entities_index
+
+    Args:
+        index_name: descriptive name for the index (i.e.: messages_index)
+
+    Returns:
+        The dictionary index mapping for the specified index.
+    """
+    index_mapping: dict = {}
+    if index_name == "messages_index":
+        index_mapping = {
+            "mappings": {
+                "properties": {
+                    "_": {
+                        "type": "text",
+                    },
+                }
+            }
+        }
+    elif index_name == "iocs_index":
+        index_mapping = {"mappings": {"properties": {}}}
+    elif index_name == "users_index":
+        index_mapping = {
+            "mappings": {
+                "properties": {
+                    "_": {
+                        "type": "text",
+                    },
+                }
+            }
+        }
+    elif index_name == "entities_index":
+        index_mapping = {
+            "mappings": {
+                "properties": {
+                    "_": {
+                        "type": "text",
+                    },
+                }
+            }
+        }
+    else:
+        raise Exception(f"Unsupported index name `{index_name}`")
+
+    return index_mapping
+
+
+def get_record_id(index_name: str, collected_obj: dict) -> str | None:
+    """
+    Generates a record ID for the current object.
+
+    A record ID is a string ID of the record to be inserted in the document's `_id` metadata field
+    https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-id-field.html
+
+    Args:
+        index_name: descriptive name for the index (i.e.: messages_index)
+        collected_obj: one collected object (e.g.: one Message, one Participant...)
+
+    Returns:
+        A record ID for the current object.
+    """
+    # Create a record ID attribute for the current object (message, user...) to store in Elasticsearch
+    record_id: str = ""
+    if index_name == "messages_index":
+        message_id: int = collected_obj.get("id")
+        entity_id: int = (
+            collected_obj.get("peer_id", {}).get("channel_id")
+            or collected_obj.get("peer_id", {}).get("chat_id")
+            or collected_obj.get("peer_id", {}).get("user_id")
+        )  # Channel (channel or public group), Chat (private group), User (direct message)
+        record_id = f"{message_id}_{entity_id}"
+    elif index_name == "iocs_index":
+        # -- Generate a deterministic hash for this IOC object's ID
+
+        # Convert the object to a JSON string and encode it to bytes
+        data_string = json.dumps(collected_obj, sort_keys=True).encode()
+
+        # Use SHA-256 hash function to generate a hash of the data
+        hash_object = hashlib.sha256(data_string)
+
+        # Return the hexadecimal representation of the digest
+        record_id = hash_object.hexdigest()
+    elif index_name == "users_index":
+        record_id = f"{collected_obj['id']}"
+    elif index_name == "entities_index":
+        record_id = f"{collected_obj['id']}"
+    else:
+        raise Exception(f"Unsupported index name `{index_name}`")
+
+    return record_id
 
 
 def index_json_file_to_es(file_path: str, index_name: str) -> bool:
@@ -43,11 +154,20 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
         logging.warning(f"Do nothing")
         return False
 
+    # Create index with the provided index mapping, if this is a new index
+    # index mapping / explicit mapping as defined by Elasticsearch https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
+    if not es.indices.exists(index=index_name):
+        index_mapping: dict = get_index_mapping(index_name)
+        es.indices.create(index=index_name, body=index_mapping)
+
     with open(file_path, "r") as file:
-        documents = json.load(file)
+        documents: list[dict] = json.load(file)
         actions = [
             {
                 "_index": index_name,
+                "_id": get_record_id(
+                    index_name, document
+                ),  # Prevents duplicate records from being inserted into the document
                 "_source": document,
             }
             for document in documents

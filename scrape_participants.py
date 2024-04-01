@@ -1,16 +1,17 @@
+"""
+Module for scraping participants/users in a given entity.
+"""
+
 import ijson
 import json
 import logging
 import os
 import re
-import time
-from datetime import datetime
-from string import ascii_lowercase
 from helper.es import index_json_file_to_es
 from telethon import TelegramClient
 from telethon.sync import helpers
 from telethon.tl.functions.channels import GetParticipantsRequest
-from telethon.tl.functions.users import GetFullUserRequest, GetUsersRequest
+from telethon.tl.functions.users import GetUsersRequest
 from telethon.types import *
 
 from helper.helper import (
@@ -85,14 +86,7 @@ def _collect_all_under_10k(
         participant_dict: dict = participant.to_dict()
         participants_list.append(participant_dict)
 
-    output_path: str = _download(participants_list, "participants", entity)
-
-    # # Index data into Elasticsearch
-    # if helper.export_to_es:
-    #     index_name: str = "users_index"
-
-    #     if index_json_file_to_es(output_path, index_name):
-    #         logging.info(f"[+] Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
+    _download(participants_list, "participants", entity)
 
 
 def _collect_all_over_10k(client, entity: Channel | Chat | User):
@@ -207,14 +201,8 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
             participant_dict: dict = participant.to_dict()
             participants_list.append(participant_dict)
 
-        output_path: str = _download(participants_list, "participants", entity)
+        _download(participants_list, "participants", entity)
 
-        # # Index data into Elasticsearch
-        # if helper.export_to_es:
-        #     index_name: str = "users_index"
-
-        #     if index_json_file_to_es(output_path, index_name):
-        #         logging.info(f"[+] Indexed {COLLECTION_NAME} to Elasticsearch as: {index_name}")
     except:
         logging.critical(
             "[-] Failed to collect data from Telegram API for unknown reasons"
@@ -289,7 +277,7 @@ def scrape_participants_from_messages(
         entity: entity of type Channel, Chat or User
 
     Return:
-        True if scrape was successful
+        True if scrape was successful, False if failed, None if scrape was not ran
     """
     # Pre-define minimal variable(s) for emergency data recovery in exception handling
     collected_participants: list = []
@@ -310,6 +298,12 @@ def scrape_participants_from_messages(
         # Extract user IDs from the messages_<entity_id>.json obtained from messages collection
         collected_user_ids: list[int] = []  # List of extracted unique user IDs
         messages_json_filename = f"{OUTPUT_DIR}/{get_entity_type_name(entity)}_{entity.id}/messages_{entity.id}.json"
+
+        # Check if message file exists (valid if it does not exist)
+        if not os.path.exists(messages_json_filename):
+            logging.info(f"No messages were collected in this collection run. The file '{messages_json_filename}' does not exist.")
+            logging.info(f"Skip scraping participants from messages")
+            return
 
         # Reduce RAM usage by storing chunks of JSON in memory, rather than the entire file
         # https://pythonspeed.com/articles/json-memory-streaming/
