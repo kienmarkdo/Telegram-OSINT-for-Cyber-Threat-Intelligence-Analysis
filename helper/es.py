@@ -52,6 +52,133 @@ def get_index_mapping(index_name: str) -> dict:
                     "_": {
                         "type": "text",
                     },
+                    "from_id": {
+                        "properties": {
+                            "_": {
+                                "type": "text",
+                            },
+                            "user_id": {"type": "keyword"},
+                        }
+                    },
+                    "fwd_from": {
+                        "properties": {
+                            "_": {
+                                "type": "text",
+                            },
+                            "from_id": {
+                                "properties": {
+                                    "_": {
+                                        "type": "text",
+                                    },
+                                    "channel_id": {"type": "keyword"},
+                                }
+                            },
+                        }
+                    },
+                    "peer_id": {
+                        "properties": {
+                            "_": {
+                                "type": "text",
+                            },
+                            "channel_id": {"type": "keyword"},
+                        }
+                    },
+                    "reactions": {
+                        "properties": {
+                            "_": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {"type": "keyword", "ignore_above": 256}
+                                },
+                            },
+                            "can_see_list": {"type": "boolean"},
+                            "min": {"type": "boolean"},
+                            "recent_reactions": {
+                                "properties": {
+                                    "_": {
+                                        "type": "text",
+                                        "fields": {
+                                            "keyword": {
+                                                "type": "keyword",
+                                                "ignore_above": 256,
+                                            }
+                                        },
+                                    },
+                                    "big": {"type": "boolean"},
+                                    "date": {"type": "date"},
+                                    "my": {"type": "boolean"},
+                                    "peer_id": {
+                                        "properties": {
+                                            "_": {
+                                                "type": "text",
+                                            },
+                                            "user_id": {"type": "keyword"},
+                                        }
+                                    },
+                                    "reaction": {
+                                        "properties": {
+                                            "_": {
+                                                "type": "text",
+                                                "fields": {
+                                                    "keyword": {
+                                                        "type": "keyword",
+                                                        "ignore_above": 256,
+                                                    }
+                                                },
+                                            },
+                                            "emoticon": {
+                                                "type": "text",
+                                                "fields": {
+                                                    "keyword": {
+                                                        "type": "keyword",
+                                                        "ignore_above": 256,
+                                                    }
+                                                },
+                                            },
+                                        }
+                                    },
+                                    "unread": {"type": "boolean"},
+                                }
+                            },
+                            "results": {
+                                "properties": {
+                                    "_": {
+                                        "type": "text",
+                                        "fields": {
+                                            "keyword": {
+                                                "type": "keyword",
+                                                "ignore_above": 256,
+                                            }
+                                        },
+                                    },
+                                    "chosen_order": {"type": "long"},
+                                    "count": {"type": "long"},
+                                    "reaction": {
+                                        "properties": {
+                                            "_": {
+                                                "type": "text",
+                                                "fields": {
+                                                    "keyword": {
+                                                        "type": "keyword",
+                                                        "ignore_above": 256,
+                                                    }
+                                                },
+                                            },
+                                            "emoticon": {
+                                                "type": "text",
+                                                "fields": {
+                                                    "keyword": {
+                                                        "type": "keyword",
+                                                        "ignore_above": 256,
+                                                    }
+                                                },
+                                            },
+                                        }
+                                    },
+                                }
+                            },
+                        }
+                    },
                 }
             }
         }
