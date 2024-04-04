@@ -20,6 +20,7 @@ from helper.helper import (
     get_entity_info,
     get_entity_type_name,
     rotate_proxy,
+    throttle,
 )
 
 from helper import helper
@@ -179,6 +180,8 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
                     f"Collected {len(all_participants)} out of {entity.participants_count} participants... "
                     f"({'{:.2f}'.format(len(all_participants)/entity.participants_count * 100)}%)"
                 )
+                # Delay code execution/API calls to prevent bot detection by Telegram
+                throttle()
 
         # After collection
 
@@ -301,7 +304,9 @@ def scrape_participants_from_messages(
 
         # Check if message file exists (valid if it does not exist)
         if not os.path.exists(messages_json_filename):
-            logging.info(f"No messages were collected in this collection run. The file '{messages_json_filename}' does not exist.")
+            logging.info(
+                f"No messages were collected in this collection run. The file '{messages_json_filename}' does not exist."
+            )
             logging.info(f"Skip scraping participants from messages")
             return
 
@@ -336,6 +341,9 @@ def scrape_participants_from_messages(
             # Use the GetUsersRequest API to get user info for the chunk
             collected_participants.extend(client(GetUsersRequest(chunk)))
 
+            # Delay code execution/API calls to prevent bot detection by Telegram
+            throttle()
+
         # Convert the Participants object to JSON
         participants_list: list[dict] = []
         for participant in collected_participants:
@@ -349,7 +357,7 @@ def scrape_participants_from_messages(
         else:
             collected_amount: int = len(collected_participants)
             logging.info(
-                f"Successfully collected {collected_amount} participants from messages"
+                f"Completed collection of {collected_amount} participants from messages via GetUsersRequest API"
             )
 
         # Download the collected data to JSON, or append to existing JSON
@@ -359,17 +367,25 @@ def scrape_participants_from_messages(
 
         if os.path.exists(participants_json_filename):
             # Participants JSON file exists; Append unique participants info to it
+            logging.info(
+                f"Downloading participants data to existing participants JSON file: {participants_json_filename}"
+            )
             with open(participants_json_filename, "r") as file:
                 existing_participants_json = json.load(file)
 
             existing_ids: set[int] = {user["id"] for user in existing_participants_json}
-            unique_users: list[dict] = [user for user in participants_list if user["id"] not in existing_ids]
+            unique_users: list[dict] = [
+                user for user in participants_list if user["id"] not in existing_ids
+            ]
             updated_participants_json = existing_participants_json + unique_users
 
             with open(participants_json_filename, "w") as file:
-                json.dump(updated_participants_json, file, indent=2)
+                json.dump(updated_participants_json, file, cls=JSONEncoder, indent=2)
         else:
             # Participants JSON does not exist; Download new Participants JSON file as usual
+            logging.info(
+                f"No participants JSON exists yet. Downloading participants data to: {participants_json_filename}"
+            )
             _download(participants_list, "participants", entity)
 
         return True
@@ -387,7 +403,7 @@ def scrape_participants_from_messages(
         for participant in collected_participants:
             participant_dict: dict = participant.to_dict()
             participants_list.append(participant_dict)
-        _download(participants_list, entity)
+        _download(participants_list, "participants", entity)
         logging.info(f"Download complete")
         raise
 
