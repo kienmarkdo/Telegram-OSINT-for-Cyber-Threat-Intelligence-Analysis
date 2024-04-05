@@ -18,7 +18,7 @@ es = Elasticsearch(
 # print(es.info())  # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
 
 
-def get_index_mapping(index_name: str) -> dict:
+def _get_index_mapping(index_name: str) -> dict:
     """
     Generates a dictionary index mapping for the specified index.
 
@@ -45,172 +45,20 @@ def get_index_mapping(index_name: str) -> dict:
         The dictionary index mapping for the specified index.
     """
     index_mapping: dict = {}
-    if index_name == "messages_index":
-        index_mapping = {
-            "mappings": {
-                "properties": {
-                    "_": {
-                        "type": "text",
-                    },
-                    "from_id": {
-                        "properties": {
-                            "_": {
-                                "type": "text",
-                            },
-                            "user_id": {"type": "keyword"},
-                        }
-                    },
-                    "fwd_from": {
-                        "properties": {
-                            "_": {
-                                "type": "text",
-                            },
-                            "from_id": {
-                                "properties": {
-                                    "_": {
-                                        "type": "text",
-                                    },
-                                    "channel_id": {"type": "keyword"},
-                                }
-                            },
-                        }
-                    },
-                    "peer_id": {
-                        "properties": {
-                            "_": {
-                                "type": "text",
-                            },
-                            "channel_id": {"type": "keyword"},
-                        }
-                    },
-                    "reactions": {
-                        "properties": {
-                            "_": {
-                                "type": "text",
-                                "fields": {
-                                    "keyword": {"type": "keyword", "ignore_above": 256}
-                                },
-                            },
-                            "can_see_list": {"type": "boolean"},
-                            "min": {"type": "boolean"},
-                            "recent_reactions": {
-                                "properties": {
-                                    "_": {
-                                        "type": "text",
-                                        "fields": {
-                                            "keyword": {
-                                                "type": "keyword",
-                                                "ignore_above": 256,
-                                            }
-                                        },
-                                    },
-                                    "big": {"type": "boolean"},
-                                    "date": {"type": "date"},
-                                    "my": {"type": "boolean"},
-                                    "peer_id": {
-                                        "properties": {
-                                            "_": {
-                                                "type": "text",
-                                            },
-                                            "user_id": {"type": "keyword"},
-                                        }
-                                    },
-                                    "reaction": {
-                                        "properties": {
-                                            "_": {
-                                                "type": "text",
-                                                "fields": {
-                                                    "keyword": {
-                                                        "type": "keyword",
-                                                        "ignore_above": 256,
-                                                    }
-                                                },
-                                            },
-                                            "emoticon": {
-                                                "type": "text",
-                                                "fields": {
-                                                    "keyword": {
-                                                        "type": "keyword",
-                                                        "ignore_above": 256,
-                                                    }
-                                                },
-                                            },
-                                        }
-                                    },
-                                    "unread": {"type": "boolean"},
-                                }
-                            },
-                            "results": {
-                                "properties": {
-                                    "_": {
-                                        "type": "text",
-                                        "fields": {
-                                            "keyword": {
-                                                "type": "keyword",
-                                                "ignore_above": 256,
-                                            }
-                                        },
-                                    },
-                                    "chosen_order": {"type": "long"},
-                                    "count": {"type": "long"},
-                                    "reaction": {
-                                        "properties": {
-                                            "_": {
-                                                "type": "text",
-                                                "fields": {
-                                                    "keyword": {
-                                                        "type": "keyword",
-                                                        "ignore_above": 256,
-                                                    }
-                                                },
-                                            },
-                                            "emoticon": {
-                                                "type": "text",
-                                                "fields": {
-                                                    "keyword": {
-                                                        "type": "keyword",
-                                                        "ignore_above": 256,
-                                                    }
-                                                },
-                                            },
-                                        }
-                                    },
-                                }
-                            },
-                        }
-                    },
-                }
-            }
-        }
-    elif index_name == "iocs_index":
-        index_mapping = {"mappings": {"properties": {}}}
-    elif index_name == "users_index":
-        index_mapping = {
-            "mappings": {
-                "properties": {
-                    "_": {
-                        "type": "text",
-                    },
-                }
-            }
-        }
-    elif index_name == "entities_index":
-        index_mapping = {
-            "mappings": {
-                "properties": {
-                    "_": {
-                        "type": "text",
-                    },
-                }
-            }
-        }
+    json_file_path: str = None
+
+    if index_name in ["messages_index", "iocs_index", "users_index", "entities_index"]:
+        json_file_path = f"helper/index_mapping/{index_name}.json"
     else:
         raise Exception(f"Unsupported index name `{index_name}`")
+
+    with open(json_file_path, "r") as json_file:
+        index_mapping = json.load(json_file)
 
     return index_mapping
 
 
-def get_record_id(index_name: str, collected_obj: dict) -> str | None:
+def _get_record_id(index_name: str, collected_obj: dict) -> str | None:
     """
     Generates a record ID for the current object.
 
@@ -284,7 +132,7 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
     # Create index with the provided index mapping, if this is a new index
     # index mapping / explicit mapping as defined by Elasticsearch https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
     if not es.indices.exists(index=index_name):
-        index_mapping: dict = get_index_mapping(index_name)
+        index_mapping: dict = _get_index_mapping(index_name)
         es.indices.create(index=index_name, body=index_mapping)
 
     with open(file_path, "r") as file:
@@ -292,7 +140,7 @@ def index_json_file_to_es(file_path: str, index_name: str) -> bool:
         actions = [
             {
                 "_index": index_name,
-                "_id": get_record_id(
+                "_id": _get_record_id(
                     index_name, document
                 ),  # Prevents duplicate records from being inserted into the document
                 "_source": document,

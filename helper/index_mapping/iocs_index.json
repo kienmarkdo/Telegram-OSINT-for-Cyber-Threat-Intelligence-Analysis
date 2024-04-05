@@ -1,0 +1,51 @@
+{
+  "mappings": {
+    "properties": {
+      "entity_id": {
+        "type": "keyword"
+      },
+      "ioc_type": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "ioc_value": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "message_id": {
+        "type": "keyword"
+      },
+      "original_message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "translated_message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "user_id": {
+        "type": "keyword"
+      }
+    }
+  }
+}

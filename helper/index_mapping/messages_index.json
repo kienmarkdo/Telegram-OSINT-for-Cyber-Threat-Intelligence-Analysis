@@ -1,0 +1,1465 @@
+{
+  "mappings": {
+    "properties": {
+      "_": {
+        "type": "text"
+      },
+      "date": {
+        "type": "date"
+      },
+      "edit_date": {
+        "type": "date"
+      },
+      "edit_hide": {
+        "type": "boolean"
+      },
+      "entities": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "document_id": {
+            "type": "keyword"
+          },
+          "language": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "length": {
+            "type": "long"
+          },
+          "offset": {
+            "type": "long"
+          },
+          "url": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "user_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "forwards": {
+        "type": "long"
+      },
+      "from_id": {
+        "properties": {
+          "_": {
+            "type": "text"
+          },
+          "channel_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "from_scheduled": {
+        "type": "boolean"
+      },
+      "fwd_from": {
+        "properties": {
+          "_": {
+            "type": "text"
+          },
+          "channel_post": {
+            "type": "long"
+          },
+          "date": {
+            "type": "date"
+          },
+          "from_id": {
+            "properties": {
+              "_": {
+                "type": "text"
+              },
+              "channel_id": {
+                "type": "keyword"
+              },
+              "user_id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "from_name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "imported": {
+            "type": "boolean"
+          },
+          "post_author": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "saved_from_msg_id": {
+            "type": "keyword"
+          },
+          "saved_from_peer": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "channel_id": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "grouped_id": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "invert_media": {
+        "type": "boolean"
+      },
+      "legacy": {
+        "type": "boolean"
+      },
+      "media": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "document": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "access_hash": {
+                "type": "long"
+              },
+              "attributes": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "duration": {
+                    "type": "float"
+                  },
+                  "file_name": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "h": {
+                    "type": "long"
+                  },
+                  "nosound": {
+                    "type": "boolean"
+                  },
+                  "round_message": {
+                    "type": "boolean"
+                  },
+                  "supports_streaming": {
+                    "type": "boolean"
+                  },
+                  "w": {
+                    "type": "long"
+                  }
+                }
+              },
+              "date": {
+                "type": "date"
+              },
+              "dc_id": {
+                "type": "keyword"
+              },
+              "file_reference": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "mime_type": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "size": {
+                "type": "long"
+              },
+              "thumbs": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "bytes": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "h": {
+                    "type": "long"
+                  },
+                  "size": {
+                    "type": "long"
+                  },
+                  "type": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "w": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "force_large_media": {
+            "type": "boolean"
+          },
+          "force_small_media": {
+            "type": "boolean"
+          },
+          "manual": {
+            "type": "boolean"
+          },
+          "nopremium": {
+            "type": "boolean"
+          },
+          "photo": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "access_hash": {
+                "type": "long"
+              },
+              "date": {
+                "type": "date"
+              },
+              "dc_id": {
+                "type": "keyword"
+              },
+              "file_reference": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "has_stickers": {
+                "type": "boolean"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "sizes": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "bytes": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "h": {
+                    "type": "long"
+                  },
+                  "size": {
+                    "type": "long"
+                  },
+                  "sizes": {
+                    "type": "long"
+                  },
+                  "type": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "w": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "safe": {
+            "type": "boolean"
+          },
+          "spoiler": {
+            "type": "boolean"
+          },
+          "webpage": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "author": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "cached_page": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "blocks": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "author": {
+                        "properties": {
+                          "_": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "text": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "caption": {
+                        "properties": {
+                          "_": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "credit": {
+                            "properties": {
+                              "_": {
+                                "type": "text",
+                                "fields": {
+                                  "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "text": {
+                            "properties": {
+                              "_": {
+                                "type": "text",
+                                "fields": {
+                                  "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                  }
+                                }
+                              },
+                              "text": {
+                                "type": "text",
+                                "fields": {
+                                  "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "items": {
+                        "properties": {
+                          "_": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "caption": {
+                            "properties": {
+                              "_": {
+                                "type": "text",
+                                "fields": {
+                                  "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                  }
+                                }
+                              },
+                              "credit": {
+                                "properties": {
+                                  "_": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "text": {
+                                "properties": {
+                                  "_": {
+                                    "type": "text",
+                                    "fields": {
+                                      "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "photo_id": {
+                            "type": "keyword"
+                          }
+                        }
+                      },
+                      "published_date": {
+                        "type": "date"
+                      },
+                      "text": {
+                        "properties": {
+                          "_": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "text": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "part": {
+                    "type": "boolean"
+                  },
+                  "photos": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "access_hash": {
+                        "type": "long"
+                      },
+                      "date": {
+                        "type": "date"
+                      },
+                      "dc_id": {
+                        "type": "keyword"
+                      },
+                      "file_reference": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "has_stickers": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "sizes": {
+                        "properties": {
+                          "_": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "bytes": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "h": {
+                            "type": "long"
+                          },
+                          "size": {
+                            "type": "long"
+                          },
+                          "sizes": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "text",
+                            "fields": {
+                              "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                              }
+                            }
+                          },
+                          "w": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "rtl": {
+                    "type": "boolean"
+                  },
+                  "url": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "v2": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "description": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "display_url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "document": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "access_hash": {
+                    "type": "long"
+                  },
+                  "attributes": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "duration": {
+                        "type": "float"
+                      },
+                      "file_name": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "h": {
+                        "type": "long"
+                      },
+                      "nosound": {
+                        "type": "boolean"
+                      },
+                      "round_message": {
+                        "type": "boolean"
+                      },
+                      "supports_streaming": {
+                        "type": "boolean"
+                      },
+                      "w": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "date": {
+                    "type": "date"
+                  },
+                  "dc_id": {
+                    "type": "keyword"
+                  },
+                  "file_reference": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "mime_type": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "size": {
+                    "type": "long"
+                  },
+                  "thumbs": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "bytes": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "h": {
+                        "type": "long"
+                      },
+                      "size": {
+                        "type": "long"
+                      },
+                      "type": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "w": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "embed_height": {
+                "type": "long"
+              },
+              "embed_type": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "embed_url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "embed_width": {
+                "type": "long"
+              },
+              "has_large_media": {
+                "type": "boolean"
+              },
+              "hash": {
+                "type": "long"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "photo": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "access_hash": {
+                    "type": "long"
+                  },
+                  "date": {
+                    "type": "date"
+                  },
+                  "dc_id": {
+                    "type": "keyword"
+                  },
+                  "file_reference": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "has_stickers": {
+                    "type": "boolean"
+                  },
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "sizes": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "bytes": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "h": {
+                        "type": "long"
+                      },
+                      "size": {
+                        "type": "long"
+                      },
+                      "sizes": {
+                        "type": "long"
+                      },
+                      "type": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "w": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "site_name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "title": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "type": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "url": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "media_unread": {
+        "type": "boolean"
+      },
+      "mentioned": {
+        "type": "boolean"
+      },
+      "message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "message_translated": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "noforwards": {
+        "type": "boolean"
+      },
+      "out": {
+        "type": "boolean"
+      },
+      "peer_id": {
+        "properties": {
+          "_": {
+            "type": "text"
+          },
+          "channel_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "pinned": {
+        "type": "boolean"
+      },
+      "post": {
+        "type": "boolean"
+      },
+      "reactions": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "can_see_list": {
+            "type": "boolean"
+          },
+          "min": {
+            "type": "boolean"
+          },
+          "recent_reactions": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "big": {
+                "type": "boolean"
+              },
+              "date": {
+                "type": "date"
+              },
+              "my": {
+                "type": "boolean"
+              },
+              "peer_id": {
+                "properties": {
+                  "_": {
+                    "type": "text"
+                  },
+                  "user_id": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "reaction": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "emoticon": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              },
+              "unread": {
+                "type": "boolean"
+              }
+            }
+          },
+          "results": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "chosen_order": {
+                "type": "long"
+              },
+              "count": {
+                "type": "long"
+              },
+              "reaction": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "emoticon": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "replies": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "comments": {
+            "type": "boolean"
+          },
+          "max_id": {
+            "type": "keyword"
+          },
+          "replies": {
+            "type": "long"
+          },
+          "replies_pts": {
+            "type": "long"
+          }
+        }
+      },
+      "reply_markup": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "rows": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "buttons": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "data": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "requires_password": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "url": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selective": {
+            "type": "boolean"
+          }
+        }
+      },
+      "reply_to": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "forum_topic": {
+            "type": "boolean"
+          },
+          "quote": {
+            "type": "boolean"
+          },
+          "quote_entities": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "document_id": {
+                "type": "keyword"
+              },
+              "length": {
+                "type": "long"
+              },
+              "offset": {
+                "type": "long"
+              }
+            }
+          },
+          "quote_text": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "reply_from": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "channel_post": {
+                "type": "long"
+              },
+              "date": {
+                "type": "date"
+              },
+              "from_id": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "channel_id": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "imported": {
+                "type": "boolean"
+              }
+            }
+          },
+          "reply_media": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "photo": {
+                "properties": {
+                  "_": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "access_hash": {
+                    "type": "long"
+                  },
+                  "date": {
+                    "type": "date"
+                  },
+                  "dc_id": {
+                    "type": "keyword"
+                  },
+                  "file_reference": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "has_stickers": {
+                    "type": "boolean"
+                  },
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "sizes": {
+                    "properties": {
+                      "_": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "bytes": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "h": {
+                        "type": "long"
+                      },
+                      "size": {
+                        "type": "long"
+                      },
+                      "sizes": {
+                        "type": "long"
+                      },
+                      "type": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      },
+                      "w": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "spoiler": {
+                "type": "boolean"
+              }
+            }
+          },
+          "reply_to_msg_id": {
+            "type": "keyword"
+          },
+          "reply_to_peer_id": {
+            "properties": {
+              "_": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "channel_id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "reply_to_scheduled": {
+            "type": "boolean"
+          },
+          "reply_to_top_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "silent": {
+        "type": "boolean"
+      },
+      "via_bot_id": {
+        "type": "keyword"
+      },
+      "views": {
+        "type": "long"
+      }
+    }
+  }
+}

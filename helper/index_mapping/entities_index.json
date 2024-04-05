@@ -1,0 +1,358 @@
+{
+  "mappings": {
+    "properties": {
+      "_": {
+        "type": "text"
+      },
+      "access_hash": {
+        "type": "long"
+      },
+      "admin_rights": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "add_admins": {
+            "type": "boolean"
+          },
+          "anonymous": {
+            "type": "boolean"
+          },
+          "ban_users": {
+            "type": "boolean"
+          },
+          "change_info": {
+            "type": "boolean"
+          },
+          "delete_messages": {
+            "type": "boolean"
+          },
+          "delete_stories": {
+            "type": "boolean"
+          },
+          "edit_messages": {
+            "type": "boolean"
+          },
+          "edit_stories": {
+            "type": "boolean"
+          },
+          "invite_users": {
+            "type": "boolean"
+          },
+          "manage_call": {
+            "type": "boolean"
+          },
+          "manage_topics": {
+            "type": "boolean"
+          },
+          "other": {
+            "type": "boolean"
+          },
+          "pin_messages": {
+            "type": "boolean"
+          },
+          "post_messages": {
+            "type": "boolean"
+          },
+          "post_stories": {
+            "type": "boolean"
+          }
+        }
+      },
+      "apply_min_photo": {
+        "type": "boolean"
+      },
+      "attach_menu_enabled": {
+        "type": "boolean"
+      },
+      "bot": {
+        "type": "boolean"
+      },
+      "bot_attach_menu": {
+        "type": "boolean"
+      },
+      "bot_can_edit": {
+        "type": "boolean"
+      },
+      "bot_chat_history": {
+        "type": "boolean"
+      },
+      "bot_info_version": {
+        "type": "long"
+      },
+      "bot_inline_geo": {
+        "type": "boolean"
+      },
+      "bot_nochats": {
+        "type": "boolean"
+      },
+      "broadcast": {
+        "type": "boolean"
+      },
+      "call_active": {
+        "type": "boolean"
+      },
+      "call_not_empty": {
+        "type": "boolean"
+      },
+      "close_friend": {
+        "type": "boolean"
+      },
+      "contact": {
+        "type": "boolean"
+      },
+      "creator": {
+        "type": "boolean"
+      },
+      "date": {
+        "type": "date"
+      },
+      "deactivated": {
+        "type": "boolean"
+      },
+      "default_banned_rights": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "change_info": {
+            "type": "boolean"
+          },
+          "embed_links": {
+            "type": "boolean"
+          },
+          "invite_users": {
+            "type": "boolean"
+          },
+          "manage_topics": {
+            "type": "boolean"
+          },
+          "pin_messages": {
+            "type": "boolean"
+          },
+          "send_audios": {
+            "type": "boolean"
+          },
+          "send_docs": {
+            "type": "boolean"
+          },
+          "send_games": {
+            "type": "boolean"
+          },
+          "send_gifs": {
+            "type": "boolean"
+          },
+          "send_inline": {
+            "type": "boolean"
+          },
+          "send_media": {
+            "type": "boolean"
+          },
+          "send_messages": {
+            "type": "boolean"
+          },
+          "send_photos": {
+            "type": "boolean"
+          },
+          "send_plain": {
+            "type": "boolean"
+          },
+          "send_polls": {
+            "type": "boolean"
+          },
+          "send_roundvideos": {
+            "type": "boolean"
+          },
+          "send_stickers": {
+            "type": "boolean"
+          },
+          "send_videos": {
+            "type": "boolean"
+          },
+          "send_voices": {
+            "type": "boolean"
+          },
+          "until_date": {
+            "type": "date"
+          },
+          "view_messages": {
+            "type": "boolean"
+          }
+        }
+      },
+      "deleted": {
+        "type": "boolean"
+      },
+      "fake": {
+        "type": "boolean"
+      },
+      "first_name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "forum": {
+        "type": "boolean"
+      },
+      "gigagroup": {
+        "type": "boolean"
+      },
+      "has_geo": {
+        "type": "boolean"
+      },
+      "has_link": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "is_self": {
+        "type": "boolean"
+      },
+      "join_request": {
+        "type": "boolean"
+      },
+      "join_to_send": {
+        "type": "boolean"
+      },
+      "left": {
+        "type": "boolean"
+      },
+      "megagroup": {
+        "type": "boolean"
+      },
+      "migrated_to": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "access_hash": {
+            "type": "long"
+          },
+          "channel_id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "min": {
+        "type": "boolean"
+      },
+      "mutual_contact": {
+        "type": "boolean"
+      },
+      "noforwards": {
+        "type": "boolean"
+      },
+      "participants_count": {
+        "type": "long"
+      },
+      "photo": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "dc_id": {
+            "type": "keyword"
+          },
+          "has_video": {
+            "type": "boolean"
+          },
+          "personal": {
+            "type": "boolean"
+          },
+          "photo_id": {
+            "type": "keyword"
+          },
+          "stripped_thumb": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "premium": {
+        "type": "boolean"
+      },
+      "restricted": {
+        "type": "boolean"
+      },
+      "scam": {
+        "type": "boolean"
+      },
+      "signatures": {
+        "type": "boolean"
+      },
+      "slowmode_enabled": {
+        "type": "boolean"
+      },
+      "stories_hidden": {
+        "type": "boolean"
+      },
+      "stories_hidden_min": {
+        "type": "boolean"
+      },
+      "stories_unavailable": {
+        "type": "boolean"
+      },
+      "support": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "username": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "verified": {
+        "type": "boolean"
+      },
+      "version": {
+        "type": "long"
+      }
+    }
+  }
+}

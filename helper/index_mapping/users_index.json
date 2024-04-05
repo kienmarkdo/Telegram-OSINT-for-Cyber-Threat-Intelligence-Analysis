@@ -1,0 +1,310 @@
+{
+  "mappings": {
+    "properties": {
+      "_": {
+        "type": "text"
+      },
+      "access_hash": {
+        "type": "long"
+      },
+      "apply_min_photo": {
+        "type": "boolean"
+      },
+      "attach_menu_enabled": {
+        "type": "boolean"
+      },
+      "bot": {
+        "type": "boolean"
+      },
+      "bot_attach_menu": {
+        "type": "boolean"
+      },
+      "bot_can_edit": {
+        "type": "boolean"
+      },
+      "bot_chat_history": {
+        "type": "boolean"
+      },
+      "bot_info_version": {
+        "type": "long"
+      },
+      "bot_inline_geo": {
+        "type": "boolean"
+      },
+      "bot_inline_placeholder": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "bot_nochats": {
+        "type": "boolean"
+      },
+      "close_friend": {
+        "type": "boolean"
+      },
+      "color": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "background_emoji_id": {
+            "type": "keyword"
+          },
+          "color": {
+            "type": "long"
+          }
+        }
+      },
+      "contact": {
+        "type": "boolean"
+      },
+      "deleted": {
+        "type": "boolean"
+      },
+      "emoji_status": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "document_id": {
+            "type": "keyword"
+          },
+          "until": {
+            "type": "date"
+          }
+        }
+      },
+      "fake": {
+        "type": "boolean"
+      },
+      "first_name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "is_self": {
+        "type": "boolean"
+      },
+      "last_name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "min": {
+        "type": "boolean"
+      },
+      "mutual_contact": {
+        "type": "boolean"
+      },
+      "phone": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "photo": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "dc_id": {
+            "type": "keyword"
+          },
+          "has_video": {
+            "type": "boolean"
+          },
+          "personal": {
+            "type": "boolean"
+          },
+          "photo_id": {
+            "type": "keyword"
+          },
+          "stripped_thumb": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "premium": {
+        "type": "boolean"
+      },
+      "profile_color": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "background_emoji_id": {
+            "type": "keyword"
+          },
+          "color": {
+            "type": "long"
+          }
+        }
+      },
+      "restricted": {
+        "type": "boolean"
+      },
+      "restriction_reason": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "platform": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "reason": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "text": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "scam": {
+        "type": "boolean"
+      },
+      "status": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "expires": {
+            "type": "date"
+          },
+          "was_online": {
+            "type": "date"
+          }
+        }
+      },
+      "stories_hidden": {
+        "type": "boolean"
+      },
+      "stories_max_id": {
+        "type": "keyword"
+      },
+      "stories_unavailable": {
+        "type": "boolean"
+      },
+      "support": {
+        "type": "boolean"
+      },
+      "username": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "usernames": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "username": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "verified": {
+        "type": "boolean"
+      }
+    }
+  }
+}
