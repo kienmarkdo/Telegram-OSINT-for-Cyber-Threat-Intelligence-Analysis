@@ -30,7 +30,7 @@ COLLECTION_NAME: str = "participants"
 
 
 def _collect_all_under_10k(
-    client: TelegramClient, entity: Channel | Chat | User
+    client: TelegramClient, entity: Channel | Chat | User, total_participants: int
 ) -> bool:
     """
     Collects all participants in a given entity via its API and stores the data in-memory.
@@ -43,6 +43,7 @@ def _collect_all_under_10k(
 
     Args:
         entity: entity of type Channel, Chat or User
+        total_participants: total number of participants in the entity
 
     Return:
         True if collection was successful
@@ -73,12 +74,11 @@ def _collect_all_under_10k(
     else:
         # Evaluate percentage of participants successfully collected
         collected_amount: int = len(all_participants)
-        total_amount: int = entity.participants_count
         logging.info(
-            f"{collected_amount} participants collected out of {total_amount} total participants"
+            f"{collected_amount} participants collected out of {total_participants} total participants"
         )
         logging.info(
-            f"Successfully collected {'{:.2f}'.format(collected_amount/total_amount * 100)}% of participants"
+            f"Successfully collected {'{:.2f}'.format(collected_amount/total_participants * 100)}% of participants"
         )
 
     # Convert the Participants object to JSON
@@ -90,7 +90,9 @@ def _collect_all_under_10k(
     _download(participants_list, "participants", entity)
 
 
-def _collect_all_over_10k(client, entity: Channel | Chat | User):
+def _collect_all_over_10k(
+    client, entity: Channel | Chat | User, total_participants: int
+):
     """
     Collects all participants in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
@@ -106,6 +108,7 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
 
     Args:
         entity: entity of type Channel, Chat or User
+        total_participants: total number of participants in the entity
 
     Return:
         True if collection was successful
@@ -151,7 +154,7 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
 
         for key in queryKey:
             offset = 0
-            limit = 100
+            limit = 200
             while True:
                 proxy_counter += 1
                 if proxy_counter % 3 == 0:
@@ -177,8 +180,8 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
 
                 offset += len(participants.users)
                 logging.info(
-                    f"Collected {len(all_participants)} out of {entity.participants_count} participants... "
-                    f"({'{:.2f}'.format(len(all_participants)/entity.participants_count * 100)}%)"
+                    f"Collected {len(all_participants)} out of {total_participants} participants... "
+                    f"({'{:.2f}'.format(len(all_participants)/total_participants * 100)}%)"
                 )
                 # Delay code execution/API calls to prevent bot detection by Telegram
                 throttle()
@@ -191,12 +194,11 @@ def _collect_all_over_10k(client, entity: Channel | Chat | User):
         else:
             # Evaluate percentage of participants successfully collected
             collected_amount: int = len(all_participants)
-            total_amount: int = entity.participants_count
             logging.info(
-                f"{collected_amount} participants collected out of {total_amount} total participants"
+                f"{collected_amount} participants collected out of {total_participants} total participants"
             )
             logging.info(
-                f"Successfully collected {'{:.2f}'.format(collected_amount/total_amount * 100)}% of participants"
+                f"Successfully collected {'{:.2f}'.format(collected_amount/total_participants * 100)}% of participants"
             )
         # Convert the Participants object to JSON
         participants_list: list[dict] = []
@@ -443,14 +445,18 @@ def scrape(
         )
         return None
 
-    if entity.participants_count <= 10000:
-        _collect_all_under_10k(client, entity)
+    # Is direct message
+    is_dm: bool = get_entity_type_name(entity) == EntityName.DIRECT_MESSAGE.value
+    entity_size: int = (
+        1 if is_dm else entity.participants_count
+    )  # Store participants count
+
+    if entity_size <= 11000:
+        _collect_all_under_10k(client, entity, entity_size)
     else:
-        logging.info(
-            f"There are {entity.participants_count} users in this {get_entity_info(entity)}"
-        )
+        logging.info(f"There are {entity_size} users in this {get_entity_info(entity)}")
         logging.info(f"Please be patient while the collection runs...")
-        _collect_all_over_10k(client, entity)
+        _collect_all_over_10k(client, entity, entity_size)
 
     # Collect participants who sent messages
     if collected_message:
