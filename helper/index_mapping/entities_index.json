@@ -2,7 +2,13 @@
   "mappings": {
     "properties": {
       "_": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
       },
       "access_hash": {
         "type": "long"

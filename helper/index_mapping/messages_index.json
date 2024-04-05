@@ -62,7 +62,13 @@
       "from_id": {
         "properties": {
           "_": {
-            "type": "text"
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
           },
           "channel_id": {
             "type": "keyword"
@@ -78,7 +84,13 @@
       "fwd_from": {
         "properties": {
           "_": {
-            "type": "text"
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
           },
           "channel_post": {
             "type": "long"
@@ -89,7 +101,13 @@
           "from_id": {
             "properties": {
               "_": {
-                "type": "text"
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
               },
               "channel_id": {
                 "type": "keyword"
