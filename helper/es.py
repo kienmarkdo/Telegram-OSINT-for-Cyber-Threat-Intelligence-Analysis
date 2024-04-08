@@ -9,11 +9,12 @@ from configs import es_ca_cert_path, es_password, es_username
 from helper.logger import OUTPUT_DIR, OUTPUT_NDJSON
 
 # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
-es = Elasticsearch(
-    "https://localhost:9200",
-    basic_auth=(es_username, es_password),
-    ca_certs=es_ca_cert_path,
-)  # Update with your credentials
+if None not in [es_ca_cert_path, es_password, es_username]:
+    es = Elasticsearch(
+        "https://localhost:9200",
+        basic_auth=(es_username, es_password),
+        ca_certs=es_ca_cert_path,
+    )  # Update with your credentials
 
 # print(es.info())  # https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html
 
