@@ -1,5 +1,5 @@
-# Telegram OSINT and Graph-Based Analysis of Criminal Activity
-Telegram OSINT and Graph Based Analysis of Criminal Activity
+# Welcome!
+To view more information about the project, visit the [Wiki](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki)!
 
 
 ## Setup
