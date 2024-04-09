@@ -16,8 +16,11 @@ To view more information about the project, visit the [Wiki](https://github.com/
    - Elasticsearch: https://www.elastic.co/downloads/elasticsearch
    - Kibana: https://www.elastic.co/downloads/kibana
 
-### API Setup
-- Navigate to http://my.telegram.org and log in with your phone number.
+### Telegram Installation / API Setup
+> [!NOTE]
+> It is recommended that you use a burner phone number, burner email address, and a VM to install Telegram Desktop.
+
+- Navigate to http://my.telegram.org and log in with your phone number
 - Navigate to "API development tools" and fill the required fields
     - App title: _anything_
     - URL: www.telegram.org
