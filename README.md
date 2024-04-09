@@ -18,7 +18,7 @@ To view more information about the project, visit the [Wiki](https://github.com/
 
 ### Telegram Installation / API Setup
 > [!NOTE]
-> It is recommended that you use a burner phone number, burner email address, and a VM to install Telegram Desktop.
+> It is recommended that you use a burner phone number, a burner email address, and a VM to install Telegram Desktop.
 
 - Navigate to http://my.telegram.org and log in with your phone number
 - Navigate to "API development tools" and fill the required fields
