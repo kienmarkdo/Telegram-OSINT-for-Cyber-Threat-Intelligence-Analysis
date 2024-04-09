@@ -2,26 +2,19 @@
 To view more information about the project, visit the [Wiki](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki)!
 
 
-## Setup
-<!-- In command prompt
-```powershell
-# Create virtual environment
-python -m venv venv
-# Enter the virtual environment
-.\venv\Scripts\activate
-# Close the virtual environment
-deactivate
-```
-Troubleshooting
-
-In Powershell
-```powershell
-Get-ExecutionPolicy
-# If "Restricted"
-Set-ExecutionPolicy RemoteSigned
-# Run the activate script again
-``` -->
-- Install git and Python *version 3.11 or lower*.
+## Quick Setup
+For detailed setup, visit the Wiki's [Set Up Development Environment page](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki/Set-Up-Development-Environment).
+### Installations
+- Install SQLite3
+    - For Windows 10/11: https://www.sqlite.org/download.html
+    - For Linux: `sudo apt install sqlite3`
+    - For MacOS: Should already be installed
+- Install Elasticsearch and Kibana
+   - Elasticsearch: https://www.elastic.co/downloads/elasticsearch
+   - Kibana: https://www.elastic.co/downloads/kibana
+- Install git https://git-scm.com/downloads
+- Install Python *version 3.11 or lower* https://www.python.org/downloads/
+### Environment Setup
 - Create virtual environment
     - `python -m venv venv`
     - Activate venv
