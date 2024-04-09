@@ -3,8 +3,11 @@ To view more information about the project, visit the [Wiki](https://github.com/
 
 
 ## Quick Setup
-For detailed setup, visit the Wiki's [Set Up Development Environment page](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki/Set-Up-Development-Environment).
+**Recommended:** Visit the Wiki's [Set Up Development Environment page](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki/Set-Up-Development-Environment) for detailed setup instructions.
+
 ### Installations
+- Install git https://git-scm.com/downloads
+- Install Python *version 3.11 or lower* https://www.python.org/downloads/
 - Install SQLite3
     - For Windows 10/11: https://www.sqlite.org/download.html
     - For Linux: `sudo apt install sqlite3`
@@ -12,8 +15,17 @@ For detailed setup, visit the Wiki's [Set Up Development Environment page](https
 - Install Elasticsearch and Kibana
    - Elasticsearch: https://www.elastic.co/downloads/elasticsearch
    - Kibana: https://www.elastic.co/downloads/kibana
-- Install git https://git-scm.com/downloads
-- Install Python *version 3.11 or lower* https://www.python.org/downloads/
+
+### API Setup
+- Navigate to http://my.telegram.org and log in with your phone number.
+- Navigate to "API development tools" and fill the required fields
+    - App title: _anything_
+    - URL: www.telegram.org
+    - Platform: Desktop
+    - Description: _anything_
+    - Click "Create application"
+- Save "App api_id" and "App api_hash" (to be used in `config.py`)
+
 ### Environment Setup
 - Create virtual environment
     - `python -m venv venv`
