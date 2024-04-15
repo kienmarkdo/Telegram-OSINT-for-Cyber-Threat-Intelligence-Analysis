@@ -58,6 +58,8 @@ Configurations:
 - Basic configurations           (REQUIRED)
 - Collection configurations      (OPTIONAL)
 - Elasticsearch configurations   (OPTIONAL)
+
+The file example_configs.py has been created as a guide template.
 """
 
 ########################
