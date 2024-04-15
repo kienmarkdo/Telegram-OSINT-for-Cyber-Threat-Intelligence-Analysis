@@ -18,7 +18,7 @@ To view more information about the project, visit the [Wiki](https://github.com/
 
 ### Telegram Installation / API Setup
 > [!NOTE]
-> It is recommended that you use a burner phone number, a burner email address, and a VM to install Telegram Desktop. For detailed Telegram setup instructions, view the [Wiki](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki/Set-Up-Research-Environment).
+> It is recommended that you use a burner phone number, a burner email address, and a VM to install Telegram Desktop. For more Telegram setup and OPSEC instructions, view the [Wiki](https://github.com/kienmarkdo/Telegram-OSINT-for-Cyber-Threat-Intelligence-Analysis/wiki/Set-Up-Research-Environment).
 
 - Set up a Telegram account on the Telegram app installed on your preferred device
 - Navigate to http://my.telegram.org and log in with your phone number
