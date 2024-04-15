@@ -59,6 +59,7 @@ Configurations:
 - Collection configurations      (OPTIONAL)
 - Elasticsearch configurations   (OPTIONAL)
 """
+
 ########################
 # Basic configurations #
 ########################
@@ -92,9 +93,9 @@ PROXIES: list[dict] = None             # (mandatory) default None for no proxy
 #     },
 # ]  # uncomment to add proxies
 
-################################
-# Elasticsearch configurations #
-################################
+##########################
+# Elastic configurations #
+##########################
 es_username: str = None                # (required) default None
 es_password: str = None                # (required) default None
 es_ca_cert_path: str = None            # (required) path to 'http_ca.crt' file stored in elasticsearch-<VERSION>/config/certs/http_ca.crt
