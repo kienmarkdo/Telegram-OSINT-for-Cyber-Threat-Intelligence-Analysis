@@ -64,7 +64,7 @@ def _collect(client: TelegramClient, entity: Channel | Chat | User) -> bool:
         # Due to limitations with the API retrieving more than 3000 messages will take longer than usual
 
         # Collection configs
-        counter: int = 0  # Track number of API calls made
+        counter: int = -1  # Track number of API calls made
         # counter_max: int = 5  # Max API calls to make in this collection
         chunk_size: int = 500  # Number of messages to retrieve per iteration
         # max_messages: int = counter_max * chunk_size
