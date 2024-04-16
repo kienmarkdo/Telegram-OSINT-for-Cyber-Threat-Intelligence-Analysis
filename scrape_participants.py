@@ -46,7 +46,7 @@ def _collect_all_under_10k(
         total_participants: total number of participants in the entity
 
     Return:
-        True if collection was successful
+        True if collection was successful, False if collection failed, None if no users were collected
     """
     # NOTE: Cannot get channel participants / subscribers unless have admin privilege
     # https://stackoverflow.com/questions/69651904/telethon-get-channel-participants-without-admin-privilages
@@ -63,14 +63,14 @@ def _collect_all_under_10k(
         logging.info(
             f"Cannot collect participants in {EntityName.BROADCAST_CHANNEL.value}. Skipping participants collection..."
         )
-        return True
+        return None
 
     all_participants: helpers.TotalList = None
     all_participants = client.get_participants(entity, limit=None)
 
     if all_participants is None or len(all_participants) == 0:
         logging.info(f"No public participants were collected. Skipping...")
-        return True
+        return None
     else:
         # Evaluate percentage of participants successfully collected
         collected_amount: int = len(all_participants)
@@ -89,10 +89,12 @@ def _collect_all_under_10k(
 
     _download(participants_list, "participants", entity)
 
+    return True
+
 
 def _collect_all_over_10k(
     client, entity: Channel | Chat | User, total_participants: int
-):
+) -> bool:
     """
     Collects all participants in a given entity via its API and stores the data in-memory.
     An entity can be a Channel (Broadcast Channel or Public Group),
@@ -111,7 +113,7 @@ def _collect_all_over_10k(
         total_participants: total number of participants in the entity
 
     Return:
-        True if collection was successful
+        True if collection was successful, False if collection failed, None if no users were collected
     """
     # Pre-define minimal variable(s) for emergency data recovery in exception handling
     all_participants = []
@@ -190,7 +192,7 @@ def _collect_all_over_10k(
 
         if all_participants is None or len(all_participants) == 0:
             logging.info(f"There are no participants to collect. Skipping...")
-            return True
+            return None
         else:
             # Evaluate percentage of participants successfully collected
             collected_amount: int = len(all_participants)
@@ -207,6 +209,8 @@ def _collect_all_over_10k(
             participants_list.append(participant_dict)
 
         _download(participants_list, "participants", entity)
+
+        return True
 
     except:
         logging.critical(
@@ -282,7 +286,8 @@ def scrape_participants_from_messages(
         entity: entity of type Channel, Chat or User
 
     Return:
-        True if scrape was successful, False if failed, None if scrape was not ran
+        True if scrape was successful, False if failed, None if scrape was not ran or
+        no participants were collected
     """
     # Pre-define minimal variable(s) for emergency data recovery in exception handling
     collected_participants: list = []
@@ -355,7 +360,7 @@ def scrape_participants_from_messages(
         # Log collection metadata / statistics
         if collected_participants is None or len(collected_participants) == 0:
             logging.info(f"No new participants were collected")
-            return True
+            return None
         else:
             collected_amount: int = len(collected_participants)
             logging.info(
@@ -437,6 +442,7 @@ def scrape(
         "--------------------------------------------------------------------------"
     )
     logging.info(f"[+] Begin {COLLECTION_NAME} scraping process")
+    participants_found: bool = False
 
     # Check that entity type is not a broadcast channel
     if get_entity_type_name(entity) == EntityName.BROADCAST_CHANNEL.value:
@@ -452,15 +458,21 @@ def scrape(
     )  # Store participants count
 
     if entity_size <= 11000:
-        _collect_all_under_10k(client, entity, entity_size)
+        participants_found = _collect_all_under_10k(client, entity, entity_size)
     else:
         logging.info(f"There are {entity_size} users in this {get_entity_info(entity)}")
         logging.info(f"Please be patient while the collection runs...")
-        _collect_all_over_10k(client, entity, entity_size)
+        participants_found = _collect_all_over_10k(client, entity, entity_size)
 
     # Collect participants who sent messages
     if collected_message:
-        scrape_participants_from_messages(client, entity)
+        if participants_found:
+            scrape_participants_from_messages(client, entity)
+        else:
+            participants_found = scrape_participants_from_messages(client, entity)
+    
+    if participants_found is not True:
+        return None
 
     # Index data into Elasticsearch
     output_path: str = (
