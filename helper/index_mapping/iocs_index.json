@@ -43,8 +43,24 @@
           }
         }
       },
-      "user_id": {
-        "type": "keyword"
+      "from_id": {
+        "properties": {
+          "_": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "channel_id": {
+            "type": "keyword"
+          },
+          "user_id": {
+            "type": "keyword"
+          }
+        }
       }
     }
   }

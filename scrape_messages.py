@@ -248,7 +248,10 @@ def _extract_iocs(message_obj: dict) -> list[dict]:
                 "entity_id": message_obj.get("peer_id", {}).get("channel_id")
                 or message_obj.get("peer_id", {}).get("chat_id")
                 or message_obj.get("peer_id", {}).get("user_id"),
-                "user_id": (message_obj.get("from_id") or {}).get("user_id"),
+                "from_id": {
+                    "user_id": (message_obj.get("from_id") or {}).get("user_id"),
+                    "channel_id": (message_obj.get("from_id") or {}).get("channel_id"),
+                },
                 "ioc_type": ioc_type,
                 "ioc_value": ioc_value,
                 "original_message": message_obj.get("message"),
