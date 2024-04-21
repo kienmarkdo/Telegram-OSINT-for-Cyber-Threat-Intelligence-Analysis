@@ -82,7 +82,7 @@ def _get_record_id(index_name: str, collected_obj: dict) -> str | None:
             or collected_obj.get("peer_id", {}).get("chat_id")
             or collected_obj.get("peer_id", {}).get("user_id")
         )  # Channel (channel or public group), Chat (private group), User (direct message)
-        record_id = f"{message_id}_{entity_id}"
+        record_id = f"{message_id}_{entity_id}"  # Record ID that concatenates message_id and entity_id
     elif index_name == "iocs_index":
         # -- Generate a deterministic hash for this IOC object's ID
 
@@ -92,12 +92,12 @@ def _get_record_id(index_name: str, collected_obj: dict) -> str | None:
         # Use SHA-256 hash function to generate a hash of the data
         hash_object = hashlib.sha256(data_string)
 
-        # Return the hexadecimal representation of the digest
+        # Record ID that is the SHA256 hash, generated based on the IOC object's values
         record_id = hash_object.hexdigest()
     elif index_name == "users_index":
-        record_id = f"{collected_obj['id']}"
+        record_id = f"{collected_obj['id']}"  # Same ID as the user ID
     elif index_name == "entities_index":
-        record_id = f"{collected_obj['id']}"
+        record_id = f"{collected_obj['id']}"  # Same ID as the entity ID
     else:
         raise Exception(f"Unsupported index name `{index_name}`")
 
